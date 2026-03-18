@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ciberseguridad en Tecnologías de Operación — OT/ICS/SCADA</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #0A1628;
+  --dark:   #0D1F3C;
+  --mid:    #1A3A5C;
+  --teal:   #0D9488;
+  --tealL:  #14B8A6;
+  --tealXL: #5EEAD4;
+  --amber:  #F59E0B;
+  --amberL: #FCD34D;
+  --red:    #EF4444;
+  --redL:   #FCA5A5;
+  --orange: #F97316;
+  --green:  #22C55E;
+  --greenD: #16A34A;
+  --white:  #FFFFFF;
+  --off:    #E2E8F0;
+  --muted:  #94A3B8;
+  --slate:  #334155;
+  --border: rgba(255,255,255,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: #030b15;
+  color: var(--off);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ─── SHELL ─────────────────────────────────────── */
+#shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ─── TOP BAR ───────────────────────────────────── */
+#topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  height: 44px;
+  background: #060f1c;
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+}
+#topbar .logo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tealL);
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+#topbar .slide-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 11px;
+  color: var(--muted);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#topbar .nav-btns { display: flex; gap: 6px; align-items: center; }
+#topbar button {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  transition: all .15s;
+}
+#topbar button:hover { background: rgba(255,255,255,0.1); color: var(--off); }
+#topbar .counter {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 42px;
+  text-align: center;
+}
+
+/* ─── MAIN AREA ─────────────────────────────────── */
+#main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ─── SIDE NAV ──────────────────────────────────── */
+#sidenav {
+  width: 200px;
+  flex-shrink: 0;
+  background: #060f1c;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 12px 0;
+}
+#sidenav::-webkit-scrollbar { width: 4px; }
+#sidenav::-webkit-scrollbar-track { background: transparent; }
+#sidenav::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 2px; }
+
+.nav-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); }
+.nav-item.active {
+  border-left-color: var(--teal);
+  background: rgba(13,148,136,0.08);
+}
+.nav-item .num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--slate);
+  padding-top: 1px;
+  flex-shrink: 0;
+}
+.nav-item.active .num { color: var(--tealL); }
+.nav-item .label {
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+.nav-item.active .label { color: var(--off); }
+
+/* ─── SLIDE VIEWPORT ────────────────────────────── */
+#viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #030b15;
+}
+
+/* Scanline overlay */
+#viewport::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none;
+  z-index: 50;
+}
+
+#slide-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide {
+  display: none;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  animation: fadeIn .3s ease;
+}
+.slide.active { display: block; }
+.slide::-webkit-scrollbar { width: 4px; }
+.slide::-webkit-scrollbar-track { background: transparent; }
+.slide::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 2px; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ─── SLIDE INNER ───────────────────────────────── */
+.slide-inner {
+  min-height: 100%;
+  padding: 0;
+  background: var(--navy);
+  position: relative;
+}
+
+/* ─── SHARED COMPONENTS ─────────────────────────── */
+.slide-header {
+  background: var(--dark);
+  padding: 10px 24px;
+  border-bottom: 3px solid var(--teal);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.slide-header h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--white);
+  text-transform: uppercase;
+}
+.slide-header .badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--tealL);
+  letter-spacing: 0.05em;
+}
+
+.slide-body { padding: 20px 24px; }
+
+.card {
+  background: var(--mid);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+.card-accent-teal  { border-left: 3px solid var(--teal); }
+.card-accent-amber { border-left: 3px solid var(--amber); }
+.card-accent-red   { border-left: 3px solid var(--red); }
+.card-accent-green { border-left: 3px solid var(--green); }
+.card-accent-orange{ border-left: 3px solid var(--orange); }
+
+.card-header {
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.footer-bar {
+  background: var(--slate);
+  padding: 6px 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ─── SLIDE 1: PORTADA ──────────────────────────── */
+#s1 .slide-inner {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 48px;
+  position: relative;
+  overflow: hidden;
+}
+#s1::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 4px;
+  background: var(--teal);
+}
+#s1 .accent-top {
+  position: absolute;
+  top: 0; right: 0;
+  height: 4px;
+  width: 160px;
+  background: linear-gradient(to right, var(--amber), var(--red));
+}
+#s1 .bg-icon {
+  position: absolute;
+  right: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 180px;
+  opacity: 0.06;
+  pointer-events: none;
+  user-select: none;
+  font-family: 'IBM Plex Mono', monospace;
+}
+#s1 .eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+#s1 h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--white);
+  max-width: 680px;
+  margin-bottom: 12px;
+}
+#s1 h1 span { color: var(--tealL); }
+#s1 .subtitle {
+  font-size: 14px;
+  color: var(--tealL);
+  margin-bottom: 28px;
+  font-weight: 500;
+}
+#s1 hr { border: none; border-top: 1px solid var(--teal); width: 360px; margin-bottom: 24px; }
+#s1 .topics {
+  font-size: 12px;
+  color: var(--off);
+  line-height: 1.9;
+  max-width: 600px;
+}
+#s1 .meta {
+  position: absolute;
+  bottom: 24px; left: 52px; right: 48px;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+#s1 .confidential { color: var(--amber); font-weight: 600; }
+
+/* ─── SLIDE 2: PANORAMA ─────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--mid);
+  border-radius: 6px;
+  padding: 16px 14px 12px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.stat-card.c-red::before   { background: var(--red); }
+.stat-card.c-amber::before { background: var(--amber); }
+.stat-card.c-orange::before{ background: var(--orange); }
+.stat-card.c-red .val   { color: var(--red); }
+.stat-card.c-amber .val { color: var(--amber); }
+.stat-card.c-orange .val{ color: var(--orange); }
+.stat-card .val {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-card .lbl {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.bar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--dark);
+  padding: 5px 10px;
+}
+.bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  opacity: 0.25;
+  border-radius: 3px;
+}
+.bar-label { font-size: 10px; color: var(--off); flex: 1; position: relative; z-index: 1; }
+.bar-pct   { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; position: relative; z-index: 1; }
+
+.sector-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--dark);
+  border-radius: 3px;
+  margin-bottom: 6px;
+  font-size: 10px;
+}
+.sector-pct { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; }
+
+/* ─── SLIDE 3: INCIDENTES ───────────────────────── */
+.timeline { position: relative; padding-left: 16px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--teal), transparent);
+}
+.tl-item {
+  position: relative;
+  margin-bottom: 14px;
+  padding-left: 20px;
+}
+.tl-dot {
+  position: absolute;
+  left: -20px;
+  top: 6px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--navy);
+}
+.tl-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.tl-year {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.tl-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--white);
+  flex: 1;
+}
+.badge-impact {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.06em;
+}
+.tl-tag {
+  font-size: 9px;
+  color: var(--tealL);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.tl-desc {
+  font-size: 10.5px;
+  color: var(--muted);
+  line-height: 1.5;
+  background: rgba(0,0,0,0.2);
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.c-red-bg    { background: rgba(239,68,68,0.15); color: var(--red); }
+.c-orange-bg { background: rgba(249,115,22,0.15); color: var(--orange); }
+
+/* ─── SLIDE 4: ARQUITECTURA ─────────────────────── */
+.purdue-levels { display: flex; flex-direction: column; gap: 6px; }
+.purdue-row {
+  display: flex;
+  align-items: stretch;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.purdue-badge {
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.purdue-content { flex: 1; padding: 8px 12px; }
+.purdue-title { font-size: 11px; font-weight: 600; color: var(--off); margin-bottom: 2px; }
+.purdue-sub { font-size: 10px; color: var(--muted); }
+
+/* ─── SLIDE 5: CASOS ────────────────────────────── */
+.cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.case-card {
+  background: var(--mid);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.case-header {
+  padding: 10px 14px;
+}
+.case-client {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--white);
+}
+.case-firm {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.case-body { padding: 10px 14px; }
+.case-section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.case-text {
+  font-size: 10px;
+  color: var(--off);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+
+/* ─── SLIDE 6: METODOLOGÍA ──────────────────────── */
+.method-phases { display: flex; flex-direction: column; gap: 10px; }
+.phase-card {
+  display: flex;
+  gap: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.phase-num {
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+.phase-content { flex: 1; padding: 10px 14px; background: var(--mid); }
+.phase-title { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; color: var(--off); margin-bottom: 6px; }
+.phase-items { display: flex; flex-wrap: wrap; gap: 5px; }
+.phase-tag {
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ─── SLIDE 7: HERRAMIENTAS ─────────────────────── */
+.tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tool-cat { background: var(--mid); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); }
+.tool-cat-header {
+  padding: 8px 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.tool-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 7px 14px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  background: var(--dark);
+}
+.tool-name { font-size: 10px; font-weight: 600; color: var(--off); }
+.tool-desc { font-size: 9.5px; color: var(--muted); max-width: 55%; text-align: right; }
+
+/* ─── SLIDE 8: RECOMENDACIONES ──────────────────── */
+.recs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.rec-col { background: var(--mid); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); }
+.rec-col-header {
+  padding: 10px 16px;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.rec-item {
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.rec-title { font-size: 10.5px; font-weight: 600; color: var(--off); margin-bottom: 3px; }
+.rec-desc  { font-size: 9.5px; color: var(--muted); line-height: 1.5; }
+.rec-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.rec-sq {
+  display: inline-block;
+  width: 8px; height: 8px;
+  margin-right: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ─── SLIDE 9: RECURSOS ─────────────────────────── */
+.resources-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.res-col { background: var(--mid); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); }
+.res-header {
+  padding: 8px 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.res-item {
+  padding: 7px 14px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+  background: var(--dark);
+}
+.res-name { font-size: 10px; font-weight: 600; color: var(--off); margin-bottom: 2px; }
+.res-desc { font-size: 9px; color: var(--muted); line-height: 1.4; }
+
+/* ─── SLIDE 10: CONCLUSIONES ────────────────────── */
+.conclusions-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; }
+.conclusion-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.18);
+  border-radius: 5px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.conclusion-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(13,148,136,0.2);
+  color: var(--tealL);
+  width: 26px; height: 26px;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.conclusion-title { font-size: 11px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+.conclusion-desc  { font-size: 9.5px; color: var(--muted); line-height: 1.5; }
+
+.roadmap-item {
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  display: flex;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.roadmap-phase {
+  width: 90px;
+  padding: 10px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.roadmap-content {
+  flex: 1;
+  padding: 10px 12px;
+  background: var(--dark);
+  font-size: 9.5px;
+  color: var(--off);
+  line-height: 1.6;
+}
+
+.quote-bar {
+  background: var(--teal);
+  padding: 10px 24px;
+  text-align: center;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--white);
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+
+/* ─── KEYBOARD HINT ─────────────────────────────── */
+#keyhint {
+  position: fixed;
+  bottom: 16px; right: 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--slate);
+  z-index: 200;
+  pointer-events: none;
+}
+kbd {
+  display: inline-block;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+/* ─── PROGRESS BAR ──────────────────────────────── */
+#progress {
+  height: 2px;
+  background: var(--teal);
+  position: fixed;
+  top: 0; left: 0;
+  transition: width .3s ease;
+  z-index: 200;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────── */
+@media (max-width: 900px) {
+  #sidenav { display: none; }
+  .two-col, .cases-grid, .recs-grid, .tools-grid, .resources-grid, .conclusions-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div id="shell">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="logo">OT/ICS SEC</div>
+    <div class="slide-title" id="current-title">Portada</div>
+    <div class="nav-btns">
+      <button onclick="prevSlide()">◀ Prev</button>
+      <span class="counter" id="counter">1 / 10</span>
+      <button onclick="nextSlide()">Next ▶</button>
+    </div>
+  </div>
+
+  <div id="main">
+
+    <!-- SIDE NAV -->
+    <div id="sidenav">
+      <div class="nav-item active" onclick="goTo(1)" id="nav1"><span class="num">01</span><span class="label">Portada</span></div>
+      <div class="nav-item" onclick="goTo(2)" id="nav2"><span class="num">02</span><span class="label">Panorama Global OT/ICS</span></div>
+      <div class="nav-item" onclick="goTo(3)" id="nav3"><span class="num">03</span><span class="label">Incidentes en Energía</span></div>
+      <div class="nav-item" onclick="goTo(4)" id="nav4"><span class="num">04</span><span class="label">Arquitectura & Superficie</span></div>
+      <div class="nav-item" onclick="goTo(5)" id="nav5"><span class="num">05</span><span class="label">Casos de Pentesting</span></div>
+      <div class="nav-item" onclick="goTo(6)" id="nav6"><span class="num">06</span><span class="label">Metodología Pentesting</span></div>
+      <div class="nav-item" onclick="goTo(7)" id="nav7"><span class="num">07</span><span class="label">Herramientas OT</span></div>
+      <div class="nav-item" onclick="goTo(8)" id="nav8"><span class="num">08</span><span class="label">Recomendaciones</span></div>
+      <div class="nav-item" onclick="goTo(9)" id="nav9"><span class="num">09</span><span class="label">Recursos & Labs</span></div>
+      <div class="nav-item" onclick="goTo(10)" id="nav10"><span class="num">10</span><span class="label">Conclusiones</span></div>
+    </div>
+
+    <!-- VIEWPORT -->
+    <div id="viewport">
+      <div id="slide-wrapper">
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 1: PORTADA                  -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide active" id="s1">
+          <div class="slide-inner" style="background:var(--navy); min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:48px 60px; position:relative;">
+            <div class="accent-top"></div>
+            <div class="bg-icon">⬡⬡⬡<br>⬡⬡⬡<br>⬡⬡⬡</div>
+            <!-- Left accent -->
+            <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--teal);"></div>
+
+            <div class="eyebrow">ANÁLISIS DE ENTORNO · SECTOR ENERGÍA · 2024–2025</div>
+            <h1>Ciberseguridad en<br><span>Tecnologías de Operación</span></h1>
+            <div class="subtitle">Sistemas de Control Industrial · ICS / SCADA / OT</div>
+            <hr>
+            <div class="topics">
+              Análisis de amenazas &amp; vectores de ataque en entornos industriales<br>
+              Incidentes críticos materializados en el sector energía (2010–2024)<br>
+              Casos de éxito: pentesting y ethical hacking en OT<br>
+              Metodología, herramientas especializadas y recomendaciones<br>
+              Recursos, certificaciones y laboratorios controlados
+            </div>
+
+            <div class="meta">
+              <span>Análisis de Entorno · Sector Energía · 2024–2025</span>
+              <span class="confidential">⚠ CONFIDENCIAL</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 2: PANORAMA GLOBAL          -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide" id="s2">
+          <div class="slide-inner">
+            <div class="slide-header" style="border-bottom-color:var(--teal);">
+              <h2>Panorama Global · OT / ICS / SCADA</h2>
+              <span class="badge">2024–2025</span>
+            </div>
+            <div class="slide-body">
+              <div class="stats-grid">
+                <div class="stat-card c-red">
+                  <div class="val">73%</div>
+                  <div class="lbl">organizaciones OT atacadas en los últimos 2 años</div>
+                </div>
+                <div class="stat-card c-amber">
+                  <div class="val">46%</div>
+                  <div class="lbl">ataques vía convergencia IT→OT</div>
+                </div>
+                <div class="stat-card c-orange">
+                  <div class="val">3.5×</div>
+                  <div class="lbl">aumento de incidentes en sector energía</div>
+                </div>
+                <div class="stat-card c-red">
+                  <div class="val">$4.7M</div>
+                  <div class="lbl">costo promedio de un incidente OT</div>
+                </div>
+              </div>
+
+              <div class="two-col">
+                <div class="card card-accent-teal">
+                  <div class="card-header" style="color:var(--tealL);">Principales vectores de ataque</div>
+                  <div class="bar-item"><div class="bar-fill" style="width:85%;background:var(--red);"></div><span class="bar-label">Ingeniería social / phishing</span><span class="bar-pct" style="color:var(--red);">34%</span></div>
+                  <div class="bar-item"><div class="bar-fill" style="width:70%;background:var(--orange);"></div><span class="bar-label">Acceso remoto comprometido (VPN/RDP)</span><span class="bar-pct" style="color:var(--orange);">28%</span></div>
+                  <div class="bar-item"><div class="bar-fill" style="width:55%;background:var(--amber);"></div><span class="bar-label">Software malicioso / ransomware</span><span class="bar-pct" style="color:var(--amber);">22%</span></div>
+                  <div class="bar-item"><div class="bar-fill" style="width:45%;background:var(--amber);"></div><span class="bar-label">Credenciales débiles o por defecto</span><span class="bar-pct" style="color:var(--amber);">18%</span></div>
+                  <div class="bar-item"><div class="bar-fill" style="width:38%;background:var(--muted);"></div><span class="bar-label">Vulnerabilidades en firmware/HMI</span><span class="bar-pct" style="color:var(--muted);">15%</span></div>
+                  <div class="bar-item"><div class="bar-fill" style="width:28%;background:var(--muted);"></div><span class="bar-label">Amenaza interna (insider threat)</span><span class="bar-pct" style="color:var(--muted);">11%</span></div>
+                  <div class="bar-item"><div class="bar-fill" style="width:23%;background:var(--muted);"></div><span class="bar-label">Supply chain / terceros</span><span class="bar-pct" style="color:var(--muted);">9%</span></div>
+                </div>
+
+                <div class="card card-accent-amber">
+                  <div class="card-header" style="color:var(--amber);">Sectores críticos más afectados</div>
+                  <div class="sector-row"><span>Energía y utilities</span><span class="sector-pct" style="color:var(--red);">31%</span></div>
+                  <div class="sector-row"><span>Manufactura</span><span class="sector-pct" style="color:var(--orange);">23%</span></div>
+                  <div class="sector-row"><span>Agua y saneamiento</span><span class="sector-pct" style="color:var(--amber);">17%</span></div>
+                  <div class="sector-row"><span>Petróleo y gas (upstream)</span><span class="sector-pct" style="color:var(--amber);">14%</span></div>
+                  <div class="sector-row"><span>Transporte / ferroviario</span><span class="sector-pct" style="color:var(--muted);">9%</span></div>
+                  <div class="sector-row"><span>Sector salud (HVAC/BMS)</span><span class="sector-pct" style="color:var(--muted);">6%</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="footer-bar">Fuentes: IBM X-Force 2024 · Dragos OT/ICS 2024 · Claroty Annual Report 2024 · SANS ICS Survey 2024</div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 3: INCIDENTES               -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide" id="s3">
+          <div class="slide-inner">
+            <div class="slide-header" style="border-bottom-color:var(--red);">
+              <h2>Incidentes Críticos · Sector Energía</h2>
+              <span class="badge" style="color:var(--red);">2010 — 2024</span>
+            </div>
+            <div class="slide-body">
+              <div class="timeline">
+
+                <div class="tl-item">
+                  <div class="tl-dot" style="background:var(--red);"></div>
+                  <div class="tl-head">
+                    <span class="tl-year" style="background:rgba(239,68,68,0.2);color:var(--red);">2010</span>
+                    <span class="tl-name">Stuxnet — Irán</span>
+                    <span class="badge-impact" style="background:var(--red);color:#fff;">CRÍTICO</span>
+                    <span class="tl-tag">Nuclear · PLC Siemens</span>
+                  </div>
+                  <div class="tl-desc">Primer ciberarma documentada contra infraestructura física. Sabotó ~1.000 centrifugadoras de enriquecimiento de uranio en Natanz. Usó 4 zero-days de Windows y PLCs Siemens S7-315/S7-417. Atribuido a EE.UU./Israel.</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot" style="background:var(--red);"></div>
+                  <div class="tl-head">
+                    <span class="tl-year" style="background:rgba(239,68,68,0.2);color:var(--red);">2015–16</span>
+                    <span class="tl-name">BlackEnergy / Industroyer — Ucrania</span>
+                    <span class="badge-impact" style="background:var(--red);color:#fff;">CRÍTICO</span>
+                    <span class="tl-tag">Energía eléctrica · SCADA</span>
+                  </div>
+                  <div class="tl-desc">Primer apagón eléctrico causado por malware. 225.000 hogares sin luz (2015). Industroyer/Crashoverride (2016) fue el primer malware que habló nativamente protocolos IEC 104, IEC 61850, GOOSE y comunicación serial.</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot" style="background:var(--red);"></div>
+                  <div class="tl-head">
+                    <span class="tl-year" style="background:rgba(239,68,68,0.2);color:var(--red);">2017</span>
+                    <span class="tl-name">TRITON / TRISIS — Arabia Saudita</span>
+                    <span class="badge-impact" style="background:var(--red);color:#fff;">CRÍTICO</span>
+                    <span class="tl-tag">Petroquímica · SIS/SIL</span>
+                  </div>
+                  <div class="tl-desc">Primer ataque contra sistemas de seguridad (SIS Triconex). Diseñado para desactivar protecciones en planta petroquímica y provocar falla física catastrófica. Atribuido a APT ruso TEMP.Veles (Sandworm).</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot" style="background:var(--orange);"></div>
+                  <div class="tl-head">
+                    <span class="tl-year" style="background:rgba(249,115,22,0.2);color:var(--orange);">2021</span>
+                    <span class="tl-name">Oldsmar Water Facility — EE.UU.</span>
+                    <span class="badge-impact" style="background:var(--orange);color:#fff;">ALTO</span>
+                    <span class="tl-tag">Agua · Acceso remoto</span>
+                  </div>
+                  <div class="tl-desc">Atacante elevó concentración de NaOH (lejía) de 111 a 11.100 ppm en planta de agua potable de Florida. Acceso vía TeamViewer con contraseña compartida. Detectado por operador en tiempo real.</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot" style="background:var(--red);"></div>
+                  <div class="tl-head">
+                    <span class="tl-year" style="background:rgba(239,68,68,0.2);color:var(--red);">2021</span>
+                    <span class="tl-name">Colonial Pipeline — EE.UU.</span>
+                    <span class="badge-impact" style="background:var(--red);color:#fff;">CRÍTICO</span>
+                    <span class="tl-tag">Petróleo · Ransomware IT→OT</span>
+                  </div>
+                  <div class="tl-desc">Ransomware DarkSide paralizó el mayor oleoducto de la costa este de EE.UU. (45% del suministro de combustible). Pagaron $4.4M. La brecha inicial fue por una cuenta VPN sin MFA.</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot" style="background:var(--red);"></div>
+                  <div class="tl-head">
+                    <span class="tl-year" style="background:rgba(239,68,68,0.2);color:var(--red);">2022</span>
+                    <span class="tl-name">Sandworm / INDUSTROYER2 — Ucrania</span>
+                    <span class="badge-impact" style="background:var(--red);color:#fff;">CRÍTICO</span>
+                    <span class="tl-tag">Eléctrico · APT Sandworm</span>
+                  </div>
+                  <div class="tl-desc">Versión mejorada de Industroyer intentó derribar subestaciones eléctricas ucranianas. Detenido por CERT-UA y Eset. También desplegó CaddyWiper para borrar evidencia del ataque.</div>
+                </div>
+
+                <div class="tl-item">
+                  <div class="tl-dot" style="background:var(--orange);"></div>
+                  <div class="tl-head">
+                    <span class="tl-year" style="background:rgba(249,115,22,0.2);color:var(--orange);">2024</span>
+                    <span class="tl-name">Volt Typhoon — Infraestructura crítica USA</span>
+                    <span class="badge-impact" style="background:var(--orange);color:#fff;">ALTO</span>
+                    <span class="tl-tag">Multi-sector · Pre-posicionamiento</span>
+                  </div>
+                  <div class="tl-desc">APT chino infiltró durante años redes OT de utilities de agua, energía y telecomunicaciones de EE.UU. Posicionamiento estratégico para sabotaje en conflicto potencial. CISA/NSA emitieron advisory.</div>
+                </div>
+
+              </div>
+            </div>
+            <div class="footer-bar">Fuentes: CISA · Dragos · ICS-CERT · MITRE ATT&CK for ICS · CrowdStrike · Eset Research</div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 4: ARQUITECTURA             -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide" id="s4">
+          <div class="slide-inner">
+            <div class="slide-header" style="border-bottom-color:var(--teal);">
+              <h2>Arquitectura OT · Modelo Purdue y Superficie de Ataque</h2>
+            </div>
+            <div class="slide-body">
+              <div class="two-col">
+                <div>
+                  <div class="card-header" style="color:var(--tealL);margin-bottom:10px;">Modelo Purdue ICS</div>
+                  <div class="purdue-levels">
+                    <div class="purdue-row" style="background:rgba(239,68,68,0.08);">
+                      <div class="purdue-badge" style="background:rgba(239,68,68,0.3);color:var(--red);">L4–5</div>
+                      <div class="purdue-content">
+                        <div class="purdue-title">Red Corporativa / ERP / Internet</div>
+                        <div class="purdue-sub">DMZ obligatoria · Firewall con inspección DPI</div>
+                      </div>
+                    </div>
+                    <div class="purdue-row" style="background:rgba(249,115,22,0.08);">
+                      <div class="purdue-badge" style="background:rgba(249,115,22,0.3);color:var(--orange);">L3</div>
+                      <div class="purdue-content">
+                        <div class="purdue-title">Historian / MES / PIMS</div>
+                        <div class="purdue-sub">Jump server · Gestión de parches OT · Antivirus whitelist</div>
+                      </div>
+                    </div>
+                    <div class="purdue-row" style="background:rgba(245,158,11,0.08);">
+                      <div class="purdue-badge" style="background:rgba(245,158,11,0.3);color:var(--amber);">L2</div>
+                      <div class="purdue-content">
+                        <div class="purdue-title">SCADA / HMI / Supervisorio</div>
+                        <div class="purdue-sub">Workstations OT · Servidores de control · OPC</div>
+                      </div>
+                    </div>
+                    <div class="purdue-row" style="background:rgba(13,148,136,0.08);">
+                      <div class="purdue-badge" style="background:rgba(13,148,136,0.3);color:var(--teal);">L1</div>
+                      <div class="purdue-content">
+                        <div class="purdue-title">PLC / RTU / DCS</div>
+                        <div class="purdue-sub">Controladores de proceso industrial</div>
+                      </div>
+                    </div>
+                    <div class="purdue-row" style="background:rgba(34,197,94,0.08);">
+                      <div class="purdue-badge" style="background:rgba(34,197,94,0.3);color:var(--green);">L0</div>
+                      <div class="purdue-content">
+                        <div class="purdue-title">Sensores / Actuadores / Field devices</div>
+                        <div class="purdue-sub">Instrumentación física · Entorno más crítico</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <div class="card card-accent-red">
+                    <div class="card-header" style="color:var(--red);">Puntos de entrada críticos</div>
+                    <div style="font-size:10px;color:var(--off);line-height:1.8;">
+                      · Acceso remoto (VPN, RDP, TeamViewer) sin MFA<br>
+                      · USB y medios removibles en zonas OT<br>
+                      · Laptops de ingeniería/mantenimiento de terceros<br>
+                      · Puertos de programación expuestos (Modbus, DNP3)
+                    </div>
+                  </div>
+                  <div class="card card-accent-orange">
+                    <div class="card-header" style="color:var(--orange);">Protocolos industriales inseguros</div>
+                    <div style="font-size:10px;color:var(--off);line-height:1.8;">
+                      · Modbus TCP/RTU — sin autenticación nativa<br>
+                      · DNP3 — sin cifrado por defecto<br>
+                      · OPC-DA/UA — configuraciones inseguras comunes<br>
+                      · Profibus / PROFINET / IEC 61850 / BACnet
+                    </div>
+                  </div>
+                  <div class="card card-accent-amber">
+                    <div class="card-header" style="color:var(--amber);">Desafíos específicos de OT</div>
+                    <div style="font-size:10px;color:var(--off);line-height:1.8;">
+                      · Sistemas legacy sin soporte (Windows XP, NT4)<br>
+                      · Imposibilidad de parchear en producción continua<br>
+                      · Convergencia IT/OT sin segmentación adecuada<br>
+                      · Visibilidad casi nula del tráfico OT
+                    </div>
+                  </div>
+                  <div class="card card-accent-green" style="background:rgba(34,197,94,0.06);">
+                    <div style="font-size:10px;color:var(--green);font-weight:600;">
+                      Estándares: IEC 62443 (ISA/IEC) · NIST SP 800-82 · NERC CIP
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="footer-bar">Modelo Purdue ICS Reference Architecture · MITRE ATT&CK for ICS · ISA/IEC 62443</div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 5: CASOS DE ÉXITO           -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide" id="s5">
+          <div class="slide-inner">
+            <div class="slide-header" style="border-bottom-color:var(--green);">
+              <h2>Pentesting en OT · Casos de Éxito y Auditorías Reales</h2>
+            </div>
+            <div class="slide-body">
+              <div class="cases-grid">
+
+                <div class="case-card">
+                  <div class="case-header" style="background:rgba(13,148,136,0.15);border-bottom:1px solid var(--teal);">
+                    <div class="case-client">Empresa eléctrica — EE.UU. (2022)</div>
+                    <div class="case-firm">Dragos / Secureworks · Red Team OT</div>
+                  </div>
+                  <div class="case-body">
+                    <div class="case-section-label" style="color:var(--red);">Hallazgos</div>
+                    <div class="case-text">Acceso a HMI de subestación desde red corporativa en 1 hop. Credenciales por defecto en 14 dispositivos Schweitzer. Comunicación Modbus no segmentada entre L2 y L1.</div>
+                    <div class="case-section-label" style="color:var(--green);">Resultado</div>
+                    <div class="case-text" style="margin-bottom:0;">Segmentación con DMZ industrial. Implementación CyberArk PAM para acceso OT. Monitoreo con Dragos Platform.</div>
+                  </div>
+                </div>
+
+                <div class="case-card">
+                  <div class="case-header" style="background:rgba(245,158,11,0.12);border-bottom:1px solid var(--amber);">
+                    <div class="case-client">Refinería de petróleo — Europa (2023)</div>
+                    <div class="case-firm">Claroty Team82 · ICS Assessment</div>
+                  </div>
+                  <div class="case-body">
+                    <div class="case-section-label" style="color:var(--red);">Hallazgos</div>
+                    <div class="case-text">8 CVEs críticos en controladores Yokogawa sin parchar (3+ años). Puerto Modbus 502 accesible desde DMZ. Historian con cuenta de servicio con privilegios de dominio completo.</div>
+                    <div class="case-section-label" style="color:var(--green);">Resultado</div>
+                    <div class="case-text" style="margin-bottom:0;">Virtual patching con IDS OT. Política de change freeze con excepción de seguridad. Reducción de superficie en 67%.</div>
+                  </div>
+                </div>
+
+                <div class="case-card">
+                  <div class="case-header" style="background:rgba(249,115,22,0.12);border-bottom:1px solid var(--orange);">
+                    <div class="case-client">Planta de agua — LATAM (2023)</div>
+                    <div class="case-firm">S21sec / Incibe · Pentest + Gap Analysis</div>
+                  </div>
+                  <div class="case-body">
+                    <div class="case-section-label" style="color:var(--red);">Hallazgos</div>
+                    <div class="case-text">TeamViewer activo en HMI con contraseña "1234". PLC Allen Bradley sin contraseña de proyecto. Red OT plana sin VLANs. Sin inventario de activos OT documentado.</div>
+                    <div class="case-section-label" style="color:var(--green);">Resultado</div>
+                    <div class="case-text" style="margin-bottom:0;">Segmentación inmediata. MFA en todos los accesos remotos. Primer inventario OT automatizado con Nozomi Networks.</div>
+                  </div>
+                </div>
+
+                <div class="case-card">
+                  <div class="case-header" style="background:rgba(239,68,68,0.12);border-bottom:1px solid var(--red);">
+                    <div class="case-client">Operador de gasoducto — Colombia/SurAm (2024)</div>
+                    <div class="case-firm">CyberArk + Palo Alto Unit 42 · Assumed Breach</div>
+                  </div>
+                  <div class="case-body">
+                    <div class="case-section-label" style="color:var(--red);">Hallazgos</div>
+                    <div class="case-text">Movimiento lateral desde VPN comprometida hasta RTU en campo en menos de 4 horas. Protocolo DNP3 sin autenticación SAv5. Sin detección de anomalías en tráfico serial.</div>
+                    <div class="case-section-label" style="color:var(--green);">Resultado</div>
+                    <div class="case-text" style="margin-bottom:0;">Implementación Claroty xDome. Zero trust para acceso OT. Ejercicio tabletop trimestral ICS. Presupuesto aprobado USD $2.3M.</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="footer-bar">Casos anonimizados: Dragos Year in Review · Claroty State of XIoT Security · Unit42 OT Threat Report</div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 6: METODOLOGÍA              -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide" id="s6">
+          <div class="slide-inner">
+            <div class="slide-header" style="border-bottom-color:var(--teal);">
+              <h2>Metodología · Pentesting en OT de Forma Segura</h2>
+            </div>
+            <div class="slide-body">
+              <div class="method-phases">
+
+                <div class="phase-card">
+                  <div class="phase-num" style="background:rgba(13,148,136,0.25);color:var(--tealL);">01</div>
+                  <div class="phase-content">
+                    <div class="phase-title" style="color:var(--tealL);">Pre-engagement y Scoping</div>
+                    <div class="phase-items">
+                      <span class="phase-tag">ROE (Rules of Engagement) estrictas</span>
+                      <span class="phase-tag">Scope: producción = NEVER</span>
+                      <span class="phase-tag">Ventanas de mantenimiento</span>
+                      <span class="phase-tag">Plan de contingencia y rollback</span>
+                      <span class="phase-tag">Acuerdo legal y seguro firmado</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="phase-card">
+                  <div class="phase-num" style="background:rgba(20,184,166,0.2);color:var(--tealXL);">02</div>
+                  <div class="phase-content">
+                    <div class="phase-title" style="color:var(--tealXL);">Reconocimiento Pasivo OT</div>
+                    <div class="phase-items">
+                      <span class="phase-tag">Análisis P&IDs y diagramas de red</span>
+                      <span class="phase-tag">Passive capture (Wireshark / Zeek)</span>
+                      <span class="phase-tag">OSINT: CVEs en firmware</span>
+                      <span class="phase-tag">Identificación protocolos: Modbus, DNP3</span>
+                      <span class="phase-tag">Sin generar tráfico al objetivo</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="phase-card">
+                  <div class="phase-num" style="background:rgba(245,158,11,0.2);color:var(--amber);">03</div>
+                  <div class="phase-content">
+                    <div class="phase-title" style="color:var(--amber);">Enumeración Activa Controlada</div>
+                    <div class="phase-items">
+                      <span class="phase-tag">Nmap lento/suave SOLO (-T1/-T2)</span>
+                      <span class="phase-tag">PLCScan + redpoint NSE scripts</span>
+                      <span class="phase-tag">Modbuspal para registros Modbus</span>
+                      <span class="phase-tag">Credenciales default (vendor-specific)</span>
+                      <span class="phase-tag">HMIs, Historians, Jump servers</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="phase-card">
+                  <div class="phase-num" style="background:rgba(249,115,22,0.2);color:var(--orange);">04</div>
+                  <div class="phase-content">
+                    <div class="phase-title" style="color:var(--orange);">Explotación y Pivoting IT→OT</div>
+                    <div class="phase-items">
+                      <span class="phase-tag">Solo CVEs con impacto reversible confirmado</span>
+                      <span class="phase-tag">Living-off-the-land en red IT primero</span>
+                      <span class="phase-tag">Pivoting: laptops ingeniería, puentes de red</span>
+                      <span class="phase-tag">Evidencia: capturas, logs, pcaps firmados</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="phase-card">
+                  <div class="phase-num" style="background:rgba(239,68,68,0.2);color:var(--red);">05</div>
+                  <div class="phase-content">
+                    <div class="phase-title" style="color:var(--red);">Post-explotación y Reporte</div>
+                    <div class="phase-items">
+                      <span class="phase-tag">Blast radius e impacto físico potencial</span>
+                      <span class="phase-tag">Risk scoring IEC 62443 SL + CVSS v3.1</span>
+                      <span class="phase-tag">Recomendaciones priorizadas por criticidad</span>
+                      <span class="phase-tag">Debriefing técnico + ejecutivo</span>
+                      <span class="phase-tag">Threat modeling ICS</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="footer-bar">Referencias: PTES · OSSTMM · IEC 62443-2-1 · NIST SP 800-115 · NERC CIP-007 · ISA99</div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 7: HERRAMIENTAS             -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide" id="s7">
+          <div class="slide-inner">
+            <div class="slide-header" style="border-bottom-color:var(--teal);">
+              <h2>Herramientas Especializadas · OT / ICS Security</h2>
+            </div>
+            <div class="slide-body">
+              <div class="tools-grid">
+
+                <div class="tool-cat">
+                  <div class="tool-cat-header" style="background:rgba(13,148,136,0.2);color:var(--tealL);">Descubrimiento y Fingerprinting</div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--tealL);">Shodan ICS filters</span><span class="tool-desc">Búsqueda pasiva de dispositivos OT expuestos en internet</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--tealL);">redpoint NSE scripts</span><span class="tool-desc">Scripts Nmap para Modbus/DNP3/BACnet/EtherNet-IP</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--tealL);">PLCScan</span><span class="tool-desc">Enumeración PLCs Siemens/Modicon/Allen-Bradley</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--tealL);">s7scan</span><span class="tool-desc">Específico Siemens S7, extrae info de CPU y rack</span></div>
+                </div>
+
+                <div class="tool-cat">
+                  <div class="tool-cat-header" style="background:rgba(245,158,11,0.15);color:var(--amber);">Análisis de Tráfico y Protocolos</div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--amber);">Wireshark + ICS dissectors</span><span class="tool-desc">Disección Modbus, DNP3, IEC 61850, GOOSE</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--amber);">Zeek (Bro) ICS scripts</span><span class="tool-desc">Análisis de tráfico OT no invasivo y logging</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--amber);">Modbuspal / ModRSSim2</span><span class="tool-desc">Simulación y análisis de protocolo Modbus</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--amber);">PyModbus / DNP3 libs</span><span class="tool-desc">Scripting Python de protocolos industriales</span></div>
+                </div>
+
+                <div class="tool-cat">
+                  <div class="tool-cat-header" style="background:rgba(249,115,22,0.15);color:var(--orange);">Plataformas de Monitoreo OT</div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--orange);">Dragos Platform</span><span class="tool-desc">Detección de amenazas ICS con threat intel específico</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--orange);">Claroty xDome</span><span class="tool-desc">Visibilidad OT/IoT y gestión de vulnerabilidades</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--orange);">Nozomi Networks</span><span class="tool-desc">Monitoreo pasivo y detección de anomalías</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--orange);">Microsoft Defender IoT</span><span class="tool-desc">Antes CyberX, integrado con Sentinel SIEM</span></div>
+                </div>
+
+                <div class="tool-cat">
+                  <div class="tool-cat-header" style="background:rgba(34,197,94,0.12);color:var(--green);">Frameworks y Labs de Práctica</div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--green);">MITRE ATT&CK for ICS</span><span class="tool-desc">Tácticas y técnicas ICS documentadas y actualizadas</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--green);">GrassMarlin (NSA)</span><span class="tool-desc">Análisis pasivo de red OT/ICS — open source</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--green);">ScadaBR / OpenSCADA</span><span class="tool-desc">SCADA open-source para entornos de laboratorio</span></div>
+                  <div class="tool-row"><span class="tool-name" style="color:var(--green);">GRFICS / MiniCPS</span><span class="tool-desc">Simuladores ICS para CTF y práctica ética</span></div>
+                </div>
+
+              </div>
+            </div>
+            <div class="footer-bar" style="color:var(--amber);">⚠ Usar EXCLUSIVAMENTE en entornos autorizados. Algunos fabricantes prohíben escaneo activo en producción.</div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 8: RECOMENDACIONES          -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide" id="s8">
+          <div class="slide-inner">
+            <div class="slide-header" style="border-bottom-color:var(--amber);">
+              <h2>Recomendaciones · Auditorías OT Responsables y Efectivas</h2>
+            </div>
+            <div class="slide-body">
+              <div class="recs-grid">
+
+                <div class="rec-col">
+                  <div class="rec-col-header" style="background:rgba(34,197,94,0.15);color:var(--green);">✓ Mejores Prácticas — DO</div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-dot" style="background:var(--green);"></span>Seguridad primero — never crash production</div>
+                    <div class="rec-desc">Toda prueba activa se realiza fuera de horario de producción o en entorno replicado. Un incidente OT puede costar vidas humanas.</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-dot" style="background:var(--green);"></span>Inventario pasivo como punto de partida</div>
+                    <div class="rec-desc">Usar sniffers pasivos (Zeek, Wireshark) durante 72–96 horas antes de cualquier prueba activa. El inventario es el activo más valioso del ejercicio.</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-dot" style="background:var(--green);"></span>Conocer el impacto físico antes de explotar</div>
+                    <div class="rec-desc">Para cada CVE, investigar si hay riesgo de falla física (fire, explosion, water contamination). Documentarlo antes de proceder.</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-dot" style="background:var(--green);"></span>Coordinar con operaciones OT en todo momento</div>
+                    <div class="rec-desc">Punto de contacto de operaciones disponible 24/7. Canal de comunicación fuera de banda (radio/celular) durante el ejercicio.</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-dot" style="background:var(--green);"></span>Usar laboratorio gemelo cuando sea posible</div>
+                    <div class="rec-desc">Replicar configuración en lab antes de testear en producción. Siemens/ABB/Schneider ofrecen licencias de simulación.</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-dot" style="background:var(--green);"></span>Reportar en lenguaje de riesgo operacional</div>
+                    <div class="rec-desc">Traducir findings técnicos a impacto de negocio: MTTF, MTBF, impacto en seguridad humana, multas regulatorias (NERC CIP).</div>
+                  </div>
+                </div>
+
+                <div class="rec-col">
+                  <div class="rec-col-header" style="background:rgba(239,68,68,0.15);color:var(--red);">✗ Errores Críticos — DON'T</div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-sq" style="background:var(--red);"></span>Escanear con Nmap agresivo en OT</div>
+                    <div class="rec-desc">Velocidades T3+ pueden saturar PLCs con memoria limitada y provocar BSOD o reset del controlador (ICS-CERT ICS-ALERT-11-343-01).</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-sq" style="background:var(--red);"></span>Explotar sin ventana de mantenimiento</div>
+                    <div class="rec-desc">Un exploit en HMI/PLC puede interrumpir un proceso físico activo. Sin ventana = riesgo de incidente con consecuencias legales y físicas.</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-sq" style="background:var(--red);"></span>Usar exploits no probados en lab previamente</div>
+                    <div class="rec-desc">En OT no existe el "probar en producción". Todo payload debe validarse en entorno de laboratorio idéntico con mismo firmware y versión.</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-sq" style="background:var(--red);"></span>Ignorar sistemas de seguridad (SIS/SIL)</div>
+                    <div class="rec-desc">Los sistemas SIL (Safety Instrumented Systems) son la última barrera contra catástrofes. NUNCA testear SIS en producción bajo ninguna circunstancia.</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-sq" style="background:var(--red);"></span>Dejar artefactos o herramientas instaladas</div>
+                    <div class="rec-desc">Remover TODAS las herramientas, accounts y artefactos al terminar. Un RAT u herramienta olvidada en OT es una APT auto-instalada.</div>
+                  </div>
+                  <div class="rec-item">
+                    <div class="rec-title"><span class="rec-sq" style="background:var(--red);"></span>Reportar solo en lenguaje técnico (CVEs)</div>
+                    <div class="rec-desc">Un reporte de 300 CVEs sin priorización por riesgo operacional es inutilizable. Riesgo alto de no-action por parte del equipo OT.</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="footer-bar">Marco ético: IEC 62443 · NIST SP 800-82 Rev.3 · SANS ICS Security Policy · NERC CIP Compliance Guidelines</div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 9: RECURSOS                 -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide" id="s9">
+          <div class="slide-inner">
+            <div class="slide-header" style="border-bottom-color:var(--teal);">
+              <h2>Recursos · Aprendizaje y Laboratorios Controlados OT/ICS</h2>
+            </div>
+            <div class="slide-body">
+              <div class="resources-grid">
+
+                <div class="res-col">
+                  <div class="res-header" style="background:rgba(13,148,136,0.2);color:var(--tealL);">Certificaciones y Formación</div>
+                  <div class="res-item"><div class="res-name" style="color:var(--tealL);">GICSP (GIAC)</div><div class="res-desc">Global Industrial Cyber Security Professional — gold standard del sector OT</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--tealL);">CSSA (ISA)</div><div class="res-desc">Certified SCADA Security Architect — enfocado en ISA/IEC 62443</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--tealL);">ICS410 SANS</div><div class="res-desc">ICS/SCADA Security Essentials — mejor curso introductorio del mercado</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--tealL);">ICS515 SANS</div><div class="res-desc">ICS Visibility, Detection & Response — nivel avanzado y operacional</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--tealL);">CISM / CISSP</div><div class="res-desc">Con especialización ICS, valorados en sector energía y utilities</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--tealL);">Siemens / Schneider</div><div class="res-desc">Formaciones vendor-specific para PLCs y sistemas SCADA propietarios</div></div>
+                </div>
+
+                <div class="res-col">
+                  <div class="res-header" style="background:rgba(245,158,11,0.15);color:var(--amber);">Plataformas de Práctica y Labs</div>
+                  <div class="res-item"><div class="res-name" style="color:var(--amber);">INL CyberCore</div><div class="res-desc">Lab del Idaho National Laboratory — simuladores nucleares y energía</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--amber);">CISA ICS-CERT Labs</div><div class="res-desc">Laboratorios virtuales gratuitos para infraestructura crítica</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--amber);">TryHackMe ICS</div><div class="res-desc">Salas gratuitas: OT Security, Modbus, SCADA intro</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--amber);">HackTheBox ICS</div><div class="res-desc">Máquinas con HMIs, PLCs y protocolos industriales</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--amber);">GRFICS (GitHub)</div><div class="res-desc">ICS simulation framework con Modbus + OPC-UA</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--amber);">MiniCPS (EPFL)</div><div class="res-desc">Mini CPS simulator con escenarios reales de agua y energía</div></div>
+                </div>
+
+                <div class="res-col">
+                  <div class="res-header" style="background:rgba(249,115,22,0.15);color:var(--orange);">Recursos, Comunidades y Blogs</div>
+                  <div class="res-item"><div class="res-name" style="color:var(--orange);">Dragos Blog</div><div class="res-desc">dragosinc.com/blog — threat intel ICS de primer nivel global</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--orange);">CISA Advisories</div><div class="res-desc">cisa.gov/ics — alertas semanales de vulnerabilidades OT</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--orange);">S4 Conference</div><div class="res-desc">s4xevents.com — conferencia #1 mundial en ICS security</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--orange);">SANS ICS Summit</div><div class="res-desc">Presentaciones públicas y whitepapers gratuitos</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--orange);">ICS-CERT NCCIC</div><div class="res-desc">Reportes de incidentes y mejores prácticas US-CERT</div></div>
+                  <div class="res-item"><div class="res-name" style="color:var(--orange);">Claroty Research</div><div class="res-desc">claroty.com/research — vulnerabilidades OT/IoT más relevantes</div></div>
+                </div>
+
+              </div>
+            </div>
+            <div class="footer-bar">Todos los recursos son públicamente accesibles. Labs deben realizarse en entornos aislados de redes de producción.</div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════ -->
+        <!-- SLIDE 10: CONCLUSIONES            -->
+        <!-- ══════════════════════════════════ -->
+        <div class="slide" id="s10">
+          <div class="slide-inner">
+            <div class="slide-header" style="border-bottom-color:var(--teal);">
+              <h2>Conclusiones · Hoja de Ruta OT Security</h2>
+            </div>
+            <div class="slide-body">
+              <div class="conclusions-grid">
+
+                <div>
+                  <div class="card-header" style="color:var(--tealL);margin-bottom:12px;">Conclusiones Clave</div>
+
+                  <div class="conclusion-item">
+                    <div class="conclusion-num">01</div>
+                    <div>
+                      <div class="conclusion-title">OT ya no está aislado — la convergencia IT/OT es real y urgente</div>
+                      <div class="conclusion-desc">El modelo air-gap está muerto. La integración con redes corporativas e internet es una realidad operacional que exige acción inmediata.</div>
+                    </div>
+                  </div>
+
+                  <div class="conclusion-item">
+                    <div class="conclusion-num">02</div>
+                    <div>
+                      <div class="conclusion-title">El sector energía es el objetivo #1 de actores APT</div>
+                      <div class="conclusion-desc">TRITON, Industroyer2 y Volt Typhoon demuestran capacidad y voluntad de atacar infraestructura crítica con consecuencias físicas.</div>
+                    </div>
+                  </div>
+
+                  <div class="conclusion-item">
+                    <div class="conclusion-num">03</div>
+                    <div>
+                      <div class="conclusion-title">La mayoría de incidentes se previenen con higiene básica</div>
+                      <div class="conclusion-desc">MFA, segmentación de red, inventario de activos y gestión de acceso privilegiado eliminan el 80% del riesgo documentado.</div>
+                    </div>
+                  </div>
+
+                  <div class="conclusion-item">
+                    <div class="conclusion-num">04</div>
+                    <div>
+                      <div class="conclusion-title">El pentesting OT requiere metodología especializada</div>
+                      <div class="conclusion-desc">No es transferir habilidades IT. Requiere entender física de procesos, protocolos industriales y riesgo operacional real.</div>
+                    </div>
+                  </div>
+
+                  <div class="conclusion-item">
+                    <div class="conclusion-num">05</div>
+                    <div>
+                      <div class="conclusion-title">La regulación está llegando — prepararse ahora</div>
+                      <div class="conclusion-desc">NIS2 (Europa), NERC CIP (EE.UU.), NIST CSF 2.0 y la Política de Ciberseguridad de infraestructura crítica en Colombia.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="card-header" style="color:var(--amber);margin-bottom:12px;">Hoja de Ruta</div>
+
+                  <div class="roadmap-item">
+                    <div class="roadmap-phase" style="background:rgba(239,68,68,0.2);color:var(--red);">INMEDIATO<br>(0–30 días)</div>
+                    <div class="roadmap-content">· Inventario pasivo de activos OT<br>· Segmentación básica IT/OT con firewall<br>· Cambiar credenciales por defecto<br>· Deshabilitar servicios innecesarios</div>
+                  </div>
+
+                  <div class="roadmap-item">
+                    <div class="roadmap-phase" style="background:rgba(249,115,22,0.2);color:var(--orange);">CORTO PLAZO<br>(1–3 meses)</div>
+                    <div class="roadmap-content">· MFA en todos los accesos remotos<br>· Monitoreo pasivo de tráfico OT<br>· Gestión de acceso privilegiado (PAM)<br>· Política de parches con ventanas</div>
+                  </div>
+
+                  <div class="roadmap-item">
+                    <div class="roadmap-phase" style="background:rgba(13,148,136,0.2);color:var(--tealL);">MEDIANO<br>(3–12 meses)</div>
+                    <div class="roadmap-content">· Primera auditoría formal ICS/OT<br>· Certificación IEC 62443 nivel básico<br>· Plan de respuesta a incidentes ICS<br>· Programa de concienciación OT</div>
+                  </div>
+
+                  <div class="roadmap-item">
+                    <div class="roadmap-phase" style="background:rgba(34,197,94,0.2);color:var(--green);">LARGO PLAZO<br>(12+ meses)</div>
+                    <div class="roadmap-content">· Red team OT completo<br>· SOC con capacidades ICS<br>· Programa de inteligencia de amenazas<br>· Revisión arquitectura Zero Trust OT</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="quote-bar">
+              "La ciberseguridad en OT no es un proyecto — es un programa continuo que requiere colaboración entre IT, OT y liderazgo ejecutivo"
+            </div>
+            <div class="footer-bar">IEC 62443 · NIST CSF 2.0 · NERC CIP · NIS2 · Política Nacional de Ciberseguridad Colombia 2024</div>
+          </div>
+        </div>
+
+      </div><!-- /slide-wrapper -->
+    </div><!-- /viewport -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<div id="keyhint"><kbd>←</kbd> <kbd>→</kbd> navegar · <kbd>1</kbd>–<kbd>0</kbd> ir a slide</div>
+
+<script>
+const TITLES = ['','Portada','Panorama Global OT/ICS','Incidentes Críticos — Energía','Arquitectura OT & Superficie','Casos de Pentesting OT','Metodología Pentesting','Herramientas Especializadas','Recomendaciones DO/DON\'T','Recursos & Laboratorios','Conclusiones & Hoja de Ruta'];
+let cur = 1;
+const total = 10;
+
+function goTo(n) {
+  if (n < 1 || n > total) return;
+  document.getElementById('s'+cur)?.classList.remove('active');
+  document.getElementById('nav'+cur)?.classList.remove('active');
+  cur = n;
+  document.getElementById('s'+cur)?.classList.add('active');
+  document.getElementById('nav'+cur)?.classList.add('active');
+  document.getElementById('nav'+cur)?.scrollIntoView({block:'nearest',behavior:'smooth'});
+  document.getElementById('counter').textContent = cur + ' / ' + total;
+  document.getElementById('current-title').textContent = TITLES[cur];
+  document.getElementById('progress').style.width = (cur/total*100)+'%';
+}
+
+function nextSlide() { goTo(cur+1); }
+function prevSlide() { goTo(cur-1); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevSlide();
+  else if (e.key >= '1' && e.key <= '9') goTo(+e.key);
+  else if (e.key === '0') goTo(10);
+});
+
+// Init progress
+document.getElementById('progress').style.width = (1/total*100)+'%';
+</script>
+</body>
+</html>
