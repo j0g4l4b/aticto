@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Genograma - Árbol Genealógico Interactivo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f4f8;--surface:#ffffff;--border:#dce3ed;--text:#1a2332;--muted:#6b7a8d;
+  --primary:#2563eb;--primary-lt:#dbeafe;--primary-dk:#1d4ed8;
+  --danger:#dc2626;--success:#16a34a;
+  --male-f:#dbeafe;--male-s:#3b82f6;--female-f:#fce7f3;--female-s:#ec4899;
+  --other-f:#fef3c7;--other-s:#f59e0b;--dead-f:#d1d5db;--dead-s:#6b7280;
+  --tag-f:#fef9c3;--tag-s:#eab308;--tag-t:#854d0e;
+  --sidebar:300px;--topbar:48px;--footer:30px;
+  --emo-peripheral:#ef4444;--emo-fraternal:#22c55e;--emo-support:#3b82f6;
+  --emo-enmeshed:#a855f7;--emo-conflict:#ef4444;--emo-hostile:#991b1b;
+}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent}
+
+/* ── LAYOUT SHELL ── */
+.shell{display:flex;flex-direction:column;height:100%}
+
+/* TOPBAR */
+.topbar{
+  height:var(--topbar);background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 10px;gap:6px;flex-shrink:0;z-index:20;
+  overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+}
+.topbar::-webkit-scrollbar{display:none}
+.topbar .logo{font-size:15px;font-weight:800;white-space:nowrap;margin-right:6px}
+.topbar .logo b{color:var(--primary)}
+
+.tb{
+  display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid var(--border);
+  border-radius:6px;background:var(--surface);color:var(--text);font-size:12px;font-weight:500;
+  cursor:pointer;white-space:nowrap;min-height:34px;transition:all .12s;flex-shrink:0;
+  -webkit-user-select:none;user-select:none;
+}
+.tb:hover{background:#f1f5f9;border-color:#94a3b8}
+.tb:active{transform:scale(.96)}
+.tb.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tb.blu{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tb.blu:hover{background:var(--primary-dk)}
+.tb.red{color:var(--danger);border-color:#fca5a5}
+.tb.red:hover{background:#fef2f2}
+.tb svg{width:15px;height:15px;fill:currentColor;flex-shrink:0}
+.tb .lbl{display:inline}
+.sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+.spacer{flex:1;min-width:4px}
+
+/* DROPDOWN */
+.dd{position:relative;display:inline-flex}
+.dd-menu{
+  position:absolute;top:calc(100% + 4px);right:0;min-width:190px;background:var(--surface);
+  border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.14);
+  padding:4px;z-index:60;display:none;
+}
+.dd-menu.open{display:block}
+.dd-menu button{
+  display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border:none;background:none;
+  color:var(--text);font-size:13px;cursor:pointer;border-radius:5px;text-align:left;
+}
+.dd-menu button:hover,.dd-menu button:active{background:#f1f5f9}
+.dd-menu button svg{width:15px;height:15px;fill:currentColor;flex-shrink:0}
+.dd-menu hr{border:none;border-top:1px solid var(--border);margin:3px 0}
+
+/* BODY */
+.body{display:flex;flex:1;overflow:hidden;position:relative}
+
+/* SIDEBAR */
+.panel{
+  width:var(--sidebar);min-width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;z-index:12;transition:transform .25s ease;
+}
+.panel-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.panel-section{padding:12px 14px;border-bottom:1px solid var(--border)}
+.panel-section h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px}
+
+/* OVERLAY for mobile sidebar */
+.panel-shade{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:11}
+
+/* Person list */
+.plist{list-style:none}
+.pitem{
+  display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:6px;cursor:pointer;
+  font-size:12px;min-height:40px;transition:background .1s;
+}
+.pitem:active,.pitem:hover{background:#f1f5f9}
+.pitem.sel{background:var(--primary-lt)}
+.pitem .dot{
+  width:18px;height:18px;border:2px solid;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:7px;
+}
+.pitem .dot.male{background:var(--male-f);border-color:var(--male-s);border-radius:2px}
+.pitem .dot.female{background:var(--female-f);border-color:var(--female-s);border-radius:50%}
+.pitem .dot.other{background:var(--other-f);border-color:var(--other-s);transform:rotate(45deg)}
+.pitem .dot.dead{background:var(--dead-f);opacity:.7}
+.pitem .dot.prob{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--primary)}
+.pitem .inf{flex:1;min-width:0;overflow:hidden}
+.pitem .inf .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pitem .inf .sub{font-size:10px;color:var(--muted);display:flex;gap:3px;flex-wrap:wrap;margin-top:1px}
+.pitem .inf .sub .t{background:var(--tag-f);color:var(--tag-t);padding:0 4px;border-radius:3px;font-size:9px;font-weight:600}
+.pitem .act{display:flex;gap:1px}
+.pitem .act button{
+  background:none;border:none;cursor:pointer;padding:5px;border-radius:4px;color:var(--muted);
+  display:flex;min-width:26px;min-height:26px;align-items:center;justify-content:center;
+}
+.pitem .act button:active{background:#e2e8f0}
+.pitem .act button svg{width:13px;height:13px;fill:currentColor}
+
+/* Canvas area */
+.stage{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+.stage svg{width:100%;height:100%;display:block;touch-action:none}
+.stage svg.grabbing{cursor:grabbing}
+.stage svg .node{cursor:grab}
+.stage svg .node:active{cursor:grabbing}
+.stage svg .node.sel .shape{stroke-width:3;filter:drop-shadow(0 0 5px rgba(37,99,235,.5))}
+
+/* Drag-to-connect line preview */
+.drag-line{pointer-events:none}
+
+/* Floating controls */
+.float-bl{position:absolute;bottom:10px;left:10px;z-index:6}
+.float-br{position:absolute;bottom:10px;right:10px;display:flex;flex-direction:column;gap:3px;z-index:6}
+.float-br .tb{box-shadow:0 2px 8px rgba(0,0,0,.1);min-width:38px;min-height:38px;justify-content:center;padding:6px}
+
+/* Legend */
+.legend-box{
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;
+  font-size:10px;display:none;gap:10px 14px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,.1);
+  max-width:min(600px,calc(100vw - 30px));max-height:45vh;overflow-y:auto;
+}
+.legend-box.open{display:flex}
+.lg{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.lg svg{width:18px;height:18px;flex-shrink:0}
+
+/* Mode indicator floating */
+.mode-bar{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:8;
+  background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:8px 16px;
+  font-size:13px;font-weight:600;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.1);
+  display:none;max-width:90vw;
+}
+.mode-bar.active{display:block}
+.mode-bar .cancel{margin-left:10px;color:var(--danger);cursor:pointer;text-decoration:underline;font-weight:500}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;opacity:0;pointer-events:none;transition:opacity .2s;display:flex;align-items:center;justify-content:center}
+.modal-bg.on{opacity:1;pointer-events:auto}
+.modal-box{
+  background:var(--surface);border-radius:14px;padding:20px;width:92%;max-width:460px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(30px) scale(.97);
+  transition:transform .25s;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;
+}
+.modal-bg.on .modal-box{transform:translateY(0) scale(1)}
+.modal-box h2{font-size:17px;margin-bottom:14px;padding-right:28px}
+.modal-box .x{position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:2px 6px;line-height:1}
+
+.fg{margin-bottom:8px}
+.fg label{display:block;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:14px;
+  color:var(--text);background:var(--bg);min-height:38px;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.fg textarea{resize:vertical;min-height:34px}
+.fr{display:flex;gap:8px}.fr .fg{flex:1}
+.ck{display:flex;align-items:center;gap:7px;margin-bottom:8px;font-size:13px;min-height:30px}
+.ck input[type=checkbox]{width:17px;height:17px;accent-color:var(--primary)}
+.ck label{cursor:pointer;font-weight:500}
+
+.tags-box{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);min-height:38px;cursor:text}
+.tags-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.tags-box .tag{display:inline-flex;align-items:center;gap:2px;background:var(--tag-f);color:var(--tag-t);border:1px solid var(--tag-s);padding:2px 5px;border-radius:4px;font-size:11px;font-weight:600}
+.tags-box .tag button{background:none;border:none;color:var(--tag-t);cursor:pointer;font-size:15px;padding:0 2px;line-height:1}
+.tags-box input{border:none;outline:none;background:none;font-size:13px;color:var(--text);flex:1;min-width:70px;padding:2px 0}
+
+.m-actions{display:flex;gap:8px;margin-top:16px}
+.m-actions .tb{flex:1;justify-content:center;min-height:42px;font-size:14px}
+
+/* Toast */
+.toast{position:fixed;bottom:44px;left:50%;transform:translateX(-50%) translateY(70px);background:#1e293b;color:#fff;padding:8px 18px;border-radius:8px;font-size:13px;z-index:200;transition:transform .3s;pointer-events:none;max-width:88vw;text-align:center}
+.toast.on{transform:translateX(-50%) translateY(0)}
+
+/* Footer */
+.foot{height:var(--footer);background:linear-gradient(135deg,#1e3a5f,#2563eb);color:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;text-align:center;padding:0 8px}
+.foot a{color:#fbbf24;text-decoration:none;font-weight:700}
+
+/* Description */
+.desc{background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;padding:8px 14px;font-size:11px;line-height:1.45;display:flex;align-items:flex-start;gap:8px;flex-shrink:0}
+.desc p{flex:1;opacity:.9;margin:0}
+.desc button{background:none;border:none;color:#fff;opacity:.5;font-size:18px;cursor:pointer;line-height:1;flex-shrink:0}
+.desc button:hover{opacity:1}
+
+.hidden{display:none}
+
+/* ── RESPONSIVE ── */
+
+/* Desktop ≥ 900px: sidebar always visible */
+@media(min-width:900px){
+  .panel{transform:translateX(0)!important}
+  .panel-shade{display:none!important}
+  .pitem .act{opacity:0;transition:opacity .12s}
+  .pitem:hover .act{opacity:1}
+  .tb .lbl{display:inline}
+}
+
+/* Tablet & Mobile < 900px */
+@media(max-width:899px){
+  :root{--sidebar:280px}
+  .panel{position:fixed;top:0;left:0;height:100%;transform:translateX(-100%);box-shadow:4px 0 20px rgba(0,0,0,.2)}
+  .panel.open{transform:translateX(0)}
+  .panel-shade.open{display:block}
+  .tb .lbl{display:none}
+}
+
+/* Small phones */
+@media(max-width:480px){
+  :root{--sidebar:100vw;--topbar:44px}
+  .topbar .logo{font-size:13px}
+  .tb{padding:5px 7px;min-height:32px}
+  .tb svg{width:14px;height:14px}
+  .desc{font-size:10px;padding:6px 10px}
+}
+
+@media print{
+  .topbar,.panel,.panel-shade,.float-bl,.float-br,.mode-bar,.toast,.desc,.foot,.dd-menu{display:none!important}
+  .body{display:block;height:auto!important}
+  .stage{position:static;width:100%;height:auto}
+  .stage svg{width:100%;height:auto}
+  @page{size:landscape;margin:1cm}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="desc" id="desc">
+  <p><b>Genograma</b> &mdash; Representaci&oacute;n gr&aacute;fica del &aacute;rbol geneal&oacute;gico familiar. Visualiza relaciones, patrones emocionales, traumas y din&aacute;micas ocultas con s&iacute;mbolos universales. Herramienta clave en terapia familiar, coaching sist&eacute;mico y constelaciones.</p>
+  <button onclick="this.parentElement.style.display='none'">&times;</button>
+</div>
+
+<div class="topbar">
+  <button class="tb" onclick="togglePanel()" title="Panel"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
+  <div class="logo">Geno<b>grama</b></div>
+  <div class="sep"></div>
+  <button class="tb" onclick="openPersonModal()"><svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span class="lbl">Persona</span></button>
+  <button class="tb" id="btnRel" onclick="startMode('relation')"><svg viewBox="0 0 24 24"><path d="M22 11V3h-7l2.79 2.79L12 11.58 6.21 5.79 3 9l9 9 5.79-5.79L20.58 15 22 11z"/></svg><span class="lbl">Relaci&oacute;n</span></button>
+  <button class="tb" id="btnEmo" onclick="startMode('emotional')"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span class="lbl">Emocional</span></button>
+  <button class="tb" onclick="startChildMode()"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg><span class="lbl">Hijo/a</span></button>
+  <button class="tb" onclick="autoLayout()" title="Organizar"><svg viewBox="0 0 24 24"><path d="M3 3v8h8V3H3zm6 6H5V5h4v4zm-6 4v8h8v-8H3zm6 6H5v-4h4v4zm4-16v8h8V3h-8zm6 6h-4V5h4v4zm-6 4v8h8v-8h-8zm6 6h-4v-4h4v4z"/></svg></button>
+  <div class="spacer"></div>
+  <div class="dd" id="ddFile">
+    <button class="tb" onclick="toggleDD('ddFile')"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg><svg viewBox="0 0 24 24" style="width:10px;height:10px;margin-left:-2px"><path d="M7 10l5 5 5-5z"/></svg></button>
+    <div class="dd-menu" id="ddFileMenu">
+      <button onclick="saveLocal();closeDD()"><svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>Guardar local</button>
+      <button onclick="loadLocal();closeDD()"><svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>Cargar local</button>
+      <hr>
+      <button onclick="expJSON();closeDD()"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Exportar JSON</button>
+      <button onclick="expCSV();closeDD()"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Exportar CSV</button>
+      <hr>
+      <button onclick="$('fJSON').click();closeDD()"><svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>Importar JSON</button>
+      <button onclick="$('fCSV').click();closeDD()"><svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>Importar CSV</button>
+      <hr>
+      <button onclick="expPNG();closeDD()"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>Exportar PNG</button>
+      <button onclick="expSVG();closeDD()"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>Exportar SVG</button>
+      <button onclick="doPrint();closeDD()"><svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>Imprimir</button>
+    </div>
+  </div>
+  <input type="file" id="fJSON" class="hidden" accept=".json" onchange="impJSON(event)">
+  <input type="file" id="fCSV" class="hidden" accept=".csv" onchange="impCSV(event)">
+  <button class="tb red" onclick="clearAll()" title="Limpiar"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+</div>
+
+<div class="body">
+  <div class="panel-shade" id="shade" onclick="togglePanel()"></div>
+
+  <aside class="panel" id="panel">
+    <div class="panel-scroll">
+      <div class="panel-section">
+        <h3>Personas</h3>
+        <ul class="plist" id="pList"></ul>
+        <button class="tb blu" onclick="openPersonModal()" style="width:100%;justify-content:center;margin-top:8px">
+          <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/></svg>
+          Agregar Persona
+        </button>
+      </div>
+      <div class="panel-section">
+        <h3>Relaciones</h3>
+        <div id="rList" style="font-size:11px;color:var(--muted)"></div>
+      </div>
+      <div class="panel-section" style="border:none">
+        <p style="font-size:10px;color:var(--muted);line-height:1.4">
+          <b>Tip:</b> Arrastra personas para posicionarlas. Doble clic para editar. Usa los botones Relaci&oacute;n / Emocional y haz clic en dos personas para conectarlas.
+        </p>
+      </div>
+    </div>
+  </aside>
+
+  <div class="stage" id="stage">
+    <svg id="cv" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#dce3ed" stroke-width="0.5"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)" class="gridbg"/>
+      <g id="dg"></g>
+      <line id="dragLine" class="drag-line" x1="0" y1="0" x2="0" y2="0" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6 4" display="none"/>
+    </svg>
+
+    <div class="mode-bar" id="modeBar"><span id="modeTxt"></span><span class="cancel" onclick="cancelMode()">Cancelar</span></div>
+
+    <div class="float-bl">
+      <button class="tb" onclick="$('legend').classList.toggle('open')" title="Leyenda"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></button>
+      <div class="legend-box" id="legend">
+        <div class="lg"><svg viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="#dbeafe" stroke="#3b82f6" stroke-width="2" rx="1"/></svg>Hombre</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/></svg>Mujer</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" rx="1"/><rect x="5" y="5" width="10" height="10" fill="none" stroke="#3b82f6" stroke-width="1.5" rx="1"/></svg>Consultante M</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/><circle cx="10" cy="10" r="5" fill="none" stroke="#ec4899" stroke-width="1.5"/></svg>Consultante F</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="#d1d5db" stroke="#6b7280" stroke-width="2" rx="1"/><line x1="4" y1="4" x2="16" y2="16" stroke="#6b7280" stroke-width="2"/><line x1="16" y1="4" x2="4" y2="16" stroke="#6b7280" stroke-width="2"/></svg>Fallecido</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><polygon points="10,2 18,18 2,18" fill="none" stroke="#64748b" stroke-width="2"/></svg>Embarazo</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><circle cx="10" cy="12" r="5" fill="#1e293b"/><line x1="10" y1="2" x2="10" y2="7" stroke="#1e293b" stroke-width="2"/></svg>Ab. Espont.</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><line x1="4" y1="4" x2="16" y2="16" stroke="#1e293b" stroke-width="2.5"/><line x1="16" y1="4" x2="4" y2="16" stroke="#1e293b" stroke-width="2.5"/></svg>Ab. Provocado</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="#dbeafe" stroke="#3b82f6" stroke-width="2" rx="1"/><rect x="2" y="10" width="16" height="8" fill="#3b82f6" opacity=".6"/></svg>SPA</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="#dbeafe" stroke="#3b82f6" stroke-width="2" rx="1"/><rect x="6" y="6" width="8" height="8" fill="#3b82f6"/></svg>Psicopat.</div>
+        <div class="lg"><svg viewBox="0 0 30 6"><line x1="0" y1="3" x2="30" y2="3" stroke="#64748b" stroke-width="2"/></svg>Casados</div>
+        <div class="lg"><svg viewBox="0 0 30 6"><line x1="0" y1="3" x2="30" y2="3" stroke="#64748b" stroke-width="2" stroke-dasharray="5 3"/></svg>Uni&oacute;n libre</div>
+        <div class="lg"><svg viewBox="0 0 30 10"><line x1="0" y1="5" x2="30" y2="5" stroke="#64748b" stroke-width="2"/><line x1="13" y1="1" x2="17" y2="9" stroke="#64748b" stroke-width="2"/></svg>Separados</div>
+        <div class="lg"><svg viewBox="0 0 30 10"><line x1="0" y1="5" x2="30" y2="5" stroke="#64748b" stroke-width="2"/><line x1="11" y1="1" x2="15" y2="9" stroke="#64748b" stroke-width="2"/><line x1="15" y1="1" x2="19" y2="9" stroke="#64748b" stroke-width="2"/></svg>Divorciados</div>
+        <div class="lg"><svg viewBox="0 0 30 6"><line x1="0" y1="3" x2="30" y2="3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6 4"/></svg>Perif&eacute;rica</div>
+        <div class="lg"><svg viewBox="0 0 30 8"><line x1="0" y1="2" x2="30" y2="2" stroke="#22c55e" stroke-width="1.5"/><line x1="0" y1="6" x2="30" y2="6" stroke="#22c55e" stroke-width="1.5"/></svg>Fraterna</div>
+        <div class="lg"><svg viewBox="0 0 30 10"><line x1="0" y1="2" x2="30" y2="2" stroke="#3b82f6" stroke-width="1.3"/><line x1="0" y1="5" x2="30" y2="5" stroke="#3b82f6" stroke-width="1.3"/><line x1="0" y1="8" x2="30" y2="8" stroke="#3b82f6" stroke-width="1.3"/></svg>Red apoyo</div>
+        <div class="lg"><svg viewBox="0 0 30 12"><line x1="0" y1="1.5" x2="30" y2="1.5" stroke="#a855f7" stroke-width="1.2"/><line x1="0" y1="4.5" x2="30" y2="4.5" stroke="#a855f7" stroke-width="1.2"/><line x1="0" y1="7.5" x2="30" y2="7.5" stroke="#a855f7" stroke-width="1.2"/><line x1="0" y1="10.5" x2="30" y2="10.5" stroke="#a855f7" stroke-width="1.2"/></svg>Enmara&ntilde;ada</div>
+        <div class="lg"><svg viewBox="0 0 30 10"><polyline points="0,5 5,1 10,9 15,1 20,9 25,1 30,5" fill="none" stroke="#ef4444" stroke-width="2"/></svg>Conflictiva</div>
+        <div class="lg"><svg viewBox="0 0 30 10"><polyline points="0,5 4,1 8,9 12,1 16,9 20,1 24,9 28,5" fill="none" stroke="#991b1b" stroke-width="1.5"/><line x1="12" y1="0" x2="18" y2="10" stroke="#991b1b" stroke-width="2"/></svg>Hostil</div>
+        <div class="lg"><svg viewBox="0 0 20 20"><rect x="1" y="6" width="18" height="8" rx="3" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/></svg>Etiqueta</div>
+      </div>
+    </div>
+
+    <div class="float-br">
+      <button class="tb" onclick="zoomIn()"><svg viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></button>
+      <button class="tb" onclick="zoomOut()"><svg viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M19 13H5v-2h14v2z"/></svg></button>
+      <button class="tb" onclick="resetView()"><svg viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">Creado con amor y luz por&nbsp;<a href="https://ciberpcia.com" target="_blank" rel="noopener">CiberPcIA</a>&nbsp;para la humanidad</footer>
+</div><!-- shell -->
+
+<!-- PERSON MODAL -->
+<div class="modal-bg" id="mPerson">
+  <div class="modal-box"><button class="x" onclick="closeM('mPerson')">&times;</button>
+    <h2 id="mPTitle">Agregar Persona</h2><input type="hidden" id="eId">
+    <div class="fg"><label>Nombre completo</label><input type="text" id="iName" placeholder="Ej: Juan P&eacute;rez"></div>
+    <div class="fr"><div class="fg"><label>Nacimiento</label><input type="date" id="iDob"></div><div class="fg"><label>G&eacute;nero</label><select id="iGen"><option value="male">Masculino</option><option value="female">Femenino</option><option value="other">Otro</option></select></div></div>
+    <div class="fr"><div class="fg"><label>Estado</label><select id="iAlive"><option value="1">Vivo/a</option><option value="0">Fallecido/a</option></select></div><div class="fg"><label>Fallecimiento</label><input type="date" id="iDod" disabled></div></div>
+    <div class="fg"><label>Tipo especial</label><select id="iType"><option value="normal">Normal</option><option value="pregnancy">Embarazo</option><option value="miscarriage">Aborto Espont&aacute;neo</option><option value="abortion">Aborto Provocado</option></select></div>
+    <div class="ck"><input type="checkbox" id="iProb"><label for="iProb">Consultante / Persona principal</label></div>
+    <div class="fr"><div class="ck"><input type="checkbox" id="iSPA"><label for="iSPA">Consumidor SPA</label></div><div class="ck"><input type="checkbox" id="iPsy"><label for="iPsy">Psicopatolog&iacute;a</label></div></div>
+    <div class="fg"><label>Etiquetas</label><div class="tags-box" id="tBox" onclick="$('tIn').focus()"><input type="text" id="tIn" placeholder="Enter para agregar..."></div><div style="font-size:9px;color:var(--muted);margin-top:2px">Heridas, traumas, PERAS, patrones, etc.</div></div>
+    <div class="fg"><label>Notas</label><textarea id="iNotes" rows="2" placeholder="Opcional..."></textarea></div>
+    <div class="m-actions"><button class="tb" onclick="closeM('mPerson')">Cancelar</button><button class="tb blu" onclick="savePerson()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- RELATION MODAL -->
+<div class="modal-bg" id="mRel">
+  <div class="modal-box"><button class="x" onclick="closeM('mRel')">&times;</button>
+    <h2>Tipo de Relaci&oacute;n</h2><input type="hidden" id="rP1"><input type="hidden" id="rP2">
+    <div class="fg"><label>Tipo</label><select id="rType"><option value="marriage">Casados / Matrimonio</option><option value="cohabitation">Uni&oacute;n libre</option><option value="separation">Separados</option><option value="divorce">Divorciados</option></select></div>
+    <div class="m-actions"><button class="tb" onclick="closeM('mRel')">Cancelar</button><button class="tb blu" onclick="saveRel()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- EMOTIONAL MODAL -->
+<div class="modal-bg" id="mEmo">
+  <div class="modal-box"><button class="x" onclick="closeM('mEmo')">&times;</button>
+    <h2>Relaci&oacute;n Emocional</h2><input type="hidden" id="eP1"><input type="hidden" id="eP2">
+    <div class="fg"><label>Tipo</label><select id="eType"><option value="peripheral">Perif&eacute;rica (distante)</option><option value="fraternal">Fraterna (cercana)</option><option value="support">Red de apoyo</option><option value="enmeshed">Enmara&ntilde;ada</option><option value="conflictive">Conflictiva</option><option value="hostile">Hostil / Cortada</option></select></div>
+    <div class="m-actions"><button class="tb" onclick="closeM('mEmo')">Cancelar</button><button class="tb blu" onclick="saveEmo()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- CHILD MODAL -->
+<div class="modal-bg" id="mChild">
+  <div class="modal-box"><button class="x" onclick="closeM('mChild')">&times;</button>
+    <h2>Vincular Hijo/a</h2>
+    <div class="fg"><label>Padres</label><select id="cUnion"></select></div>
+    <div class="fg"><label>Hijo/a</label><select id="cPerson"></select></div>
+    <div class="fg"><label>Filiaci&oacute;n</label><select id="cType"><option value="biological">Biol&oacute;gico/a</option><option value="adopted">Adoptivo/a</option><option value="foster">De crianza</option></select></div>
+    <div class="m-actions"><button class="tb" onclick="closeM('mChild')">Cancelar</button><button class="tb blu" onclick="saveChild()">Guardar</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const NS='http://www.w3.org/2000/svg',SZ=50,HS=25;
+const $=id=>document.getElementById(id);
+const COL={
+  male:{f:'#dbeafe',s:'#3b82f6'},female:{f:'#fce7f3',s:'#ec4899'},other:{f:'#fef3c7',s:'#f59e0b'},
+  dead:{f:'#d1d5db',s:'#6b7280'},ln:'#64748b',tg:{f:'#fef9c3',s:'#eab308',t:'#854d0e'},
+  emo:{peripheral:'#ef4444',fraternal:'#22c55e',support:'#3b82f6',enmeshed:'#a855f7',conflictive:'#ef4444',hostile:'#991b1b'}
+};
+const D={p:[],u:[],ch:[],em:[],nid:1,sel:null,mode:'select',mf:null,z:1,px:0,py:0};
+let tags=[];
+
+/* ── HELPERS ── */
+function fp(id){return D.p.find(p=>p.id===id)}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function el(t,a){const e=document.createElementNS(NS,t);if(a)for(const[k,v]of Object.entries(a))e.setAttribute(k,v);return e}
+function age(d,dd){if(!d)return null;const e=dd?new Date(dd):new Date(),b=new Date(d);let a=e.getFullYear()-b.getFullYear();const m=e.getMonth()-b.getMonth();if(m<0||(m===0&&e.getDate()<b.getDate()))a--;return a}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2500)}
+function ulbl(u){const a=fp(u.p1),b=fp(u.p2);if(!a||!b)return'?';const T={marriage:'Casados',cohabitation:'Unión libre',separation:'Separados',divorce:'Divorciados'};return`${a.name.split(' ')[0]} & ${b.name.split(' ')[0]} (${T[u.type]||u.type})`}
+
+/* ── TAGS ── */
+$('tIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.value.trim()){e.preventDefault();const v=e.target.value.trim();if(!tags.includes(v))tags.push(v);e.target.value='';drawTags()}if(e.key==='Backspace'&&!e.target.value&&tags.length){tags.pop();drawTags()}});
+function drawTags(){const c=$('tBox');c.querySelectorAll('.tag').forEach(t=>t.remove());tags.forEach((t,i)=>{const s=document.createElement('span');s.className='tag';s.innerHTML=esc(t)+`<button onclick="tags.splice(${i},1);drawTags()">&times;</button>`;c.insertBefore(s,$('tIn'))})}
+
+/* ── DROPDOWN ── */
+function toggleDD(id){const m=$(id+'Menu');const o=m.classList.contains('open');closeDD();if(!o)m.classList.add('open')}
+function closeDD(){document.querySelectorAll('.dd-menu').forEach(m=>m.classList.remove('open'))}
+document.addEventListener('click',e=>{if(!e.target.closest('.dd'))closeDD()});
+
+/* ── PANEL ── */
+function togglePanel(){$('panel').classList.toggle('open');$('shade').classList.toggle('open')}
+
+/* ── MODALS ── */
+function openM(id){$(id).classList.add('on')}
+function closeM(id){$(id).classList.remove('on')}
+
+/* ── SVG DRAWING ── */
+function drawNode(g,p){
+  const{x,y,gender:gn,alive,name,dob,dod,proband,tags:tg,notes,type,spa,psych}=p;
+  const col=alive?(COL[gn]||COL.other):COL.dead;
+  const bs=(alive?(COL[gn]||COL.other):COL.dead).s;
+  const gr=el('g',{class:'node'+(D.sel===p.id?' sel':''),'data-id':p.id,transform:`translate(${x},${y})`});
+
+  if(type==='pregnancy'){
+    if(proband)gr.appendChild(el('polygon',{points:`0,${-HS-5} ${HS+5},${HS+5} ${-HS-5},${HS+5}`,fill:'none',stroke:bs,'stroke-width':2.5}));
+    gr.appendChild(el('polygon',{points:`0,${-HS} ${HS},${HS} ${-HS},${HS}`,fill:col.f,stroke:bs,'stroke-width':2.5,class:'shape'}));
+  }else if(type==='miscarriage'){
+    gr.appendChild(el('line',{x1:0,y1:-HS,x2:0,y2:-6,stroke:'#1e293b','stroke-width':2}));
+    gr.appendChild(el('circle',{cx:0,cy:4,r:10,fill:'#1e293b',class:'shape'}));
+  }else if(type==='abortion'){
+    gr.appendChild(el('line',{x1:-14,y1:-14,x2:14,y2:14,stroke:'#1e293b','stroke-width':3,class:'shape'}));
+    gr.appendChild(el('line',{x1:14,y1:-14,x2:-14,y2:14,stroke:'#1e293b','stroke-width':3}));
+  }else{
+    if(gn==='male'){
+      if(proband)gr.appendChild(el('rect',{x:-HS-5,y:-HS-5,width:SZ+10,height:SZ+10,rx:3,fill:'none',stroke:bs,'stroke-width':2.5}));
+      gr.appendChild(el('rect',{x:-HS,y:-HS,width:SZ,height:SZ,rx:3,fill:col.f,stroke:bs,'stroke-width':2.5,class:'shape'}));
+      if(spa){gr.appendChild(el('rect',{x:-HS,y:0,width:SZ,height:HS,fill:bs,opacity:.5}));gr.appendChild(el('rect',{x:-HS,y:-HS,width:SZ,height:SZ,rx:3,fill:'none',stroke:bs,'stroke-width':2.5}))}
+      if(psych)gr.appendChild(el('rect',{x:-HS+8,y:-HS+8,width:SZ-16,height:SZ-16,fill:bs}));
+    }else if(gn==='female'){
+      if(proband)gr.appendChild(el('circle',{cx:0,cy:0,r:HS+5,fill:'none',stroke:bs,'stroke-width':2.5}));
+      gr.appendChild(el('circle',{cx:0,cy:0,r:HS,fill:col.f,stroke:bs,'stroke-width':2.5,class:'shape'}));
+      if(spa){
+        const cp=el('clipPath',{id:'spa'+p.id});cp.appendChild(el('rect',{x:-HS,y:0,width:SZ,height:HS}));
+        const defs=$('cv').querySelector('defs');defs.appendChild(cp);
+        gr.appendChild(el('circle',{cx:0,cy:0,r:HS-1,fill:bs,opacity:.5,'clip-path':`url(#spa${p.id})`}));
+        gr.appendChild(el('circle',{cx:0,cy:0,r:HS,fill:'none',stroke:bs,'stroke-width':2.5}));
+      }
+      if(psych)gr.appendChild(el('circle',{cx:0,cy:0,r:HS-10,fill:bs}));
+    }else{
+      if(proband)gr.appendChild(el('rect',{x:-HS*.7-4,y:-HS*.7-4,width:SZ*.7+8,height:SZ*.7+8,rx:2,fill:'none',stroke:bs,'stroke-width':2.5,transform:'rotate(45)'}));
+      gr.appendChild(el('rect',{x:-HS*.7,y:-HS*.7,width:SZ*.7,height:SZ*.7,rx:2,fill:col.f,stroke:bs,'stroke-width':2.5,transform:'rotate(45)',class:'shape'}));
+    }
+    if(!alive){gr.appendChild(el('line',{x1:-HS+4,y1:-HS+4,x2:HS-4,y2:HS-4,stroke:COL.dead.s,'stroke-width':2.5}));gr.appendChild(el('line',{x1:HS-4,y1:-HS+4,x2:-HS+4,y2:HS-4,stroke:COL.dead.s,'stroke-width':2.5}))}
+  }
+
+  let ty=HS+14;if(type==='miscarriage'||type==='abortion')ty=22;
+  const nt=el('text',{x:0,y:ty,'text-anchor':'middle','font-size':'11','font-weight':'600',fill:'#1a2332','font-family':'inherit'});
+  nt.textContent=name.length>16?name.substring(0,14)+'…':name;gr.appendChild(nt);
+  const a=age(dob,alive?null:dod);
+  if(dob&&type==='normal'){ty+=12;const at=el('text',{x:0,y:ty,'text-anchor':'middle','font-size':'10',fill:'#6b7a8d','font-family':'inherit'});at.textContent=a!==null?(alive?a+' años':'† '+a+' años'):'';gr.appendChild(at)}
+  if(tg&&tg.length){ty+=4;for(const t of tg){ty+=14;const tw=Math.min(t.length*6+10,100);gr.appendChild(el('rect',{x:-tw/2,y:ty-10,width:tw,height:13,rx:3,fill:COL.tg.f,stroke:COL.tg.s,'stroke-width':1}));const tt=el('text',{x:0,y:ty,'text-anchor':'middle','font-size':'9','font-weight':'700',fill:COL.tg.t,'font-family':'inherit'});tt.textContent=t.length>14?t.substring(0,12)+'…':t;gr.appendChild(tt)}}
+  if(notes){ty+=12;const n2=el('text',{x:0,y:ty,'text-anchor':'middle','font-size':'9',fill:'#94a3b8','font-style':'italic','font-family':'inherit'});n2.textContent=notes.length>18?notes.substring(0,16)+'…':notes;gr.appendChild(n2)}
+  g.appendChild(gr);
+}
+
+function drawUnion(g,u){
+  const a=fp(u.p1),b=fp(u.p2);if(!a||!b)return;
+  const l=a.x<b.x?a:b,r=a.x<b.x?b:a;
+  const y=(l.y+r.y)/2,x1=l.x+HS+2,x2=r.x-HS-2;
+  let da='';if(u.type==='cohabitation')da='8 4';
+  g.appendChild(el('line',{x1,y1:y,x2,y2:y,stroke:COL.ln,'stroke-width':2,...(da?{'stroke-dasharray':da}:{})}));
+  const mx=(x1+x2)/2;
+  if(u.type==='separation')g.appendChild(el('line',{x1:mx-3,y1:y-6,x2:mx+3,y2:y+6,stroke:COL.ln,'stroke-width':2}));
+  if(u.type==='divorce'){g.appendChild(el('line',{x1:mx-5,y1:y-6,x2:mx+1,y2:y+6,stroke:COL.ln,'stroke-width':2}));g.appendChild(el('line',{x1:mx-1,y1:y-6,x2:mx+5,y2:y+6,stroke:COL.ln,'stroke-width':2}))}
+}
+
+function drawChildren(g){
+  const uc={};D.ch.forEach(c=>{if(!uc[c.uid])uc[c.uid]=[];uc[c.uid].push(c)});
+  for(const[uid,ch]of Object.entries(uc)){
+    const u=D.u.find(u=>u.id===+uid);if(!u)continue;
+    const a=fp(u.p1),b=fp(u.p2);if(!a||!b)continue;
+    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    const cp=ch.map(c=>({...c,p:fp(c.cid)})).filter(c=>c.p);if(!cp.length)continue;
+    const by=my+55;
+    g.appendChild(el('line',{x1:mx,y1:my,x2:mx,y2:by,stroke:COL.ln,'stroke-width':1.5}));
+    if(cp.length>1){const xs=cp.map(c=>c.p.x).sort((a,b)=>a-b);g.appendChild(el('line',{x1:xs[0],y1:by,x2:xs[xs.length-1],y2:by,stroke:COL.ln,'stroke-width':1.5}))}
+    cp.forEach(c=>{const cx=c.p.x,cy=c.p.y-HS-(c.p.proband?7:2);let da='';if(c.type==='adopted')da='6 3';if(c.type==='foster')da='2 3';
+      g.appendChild(el('line',{x1:cp.length===1?mx:cx,y1:by,x2:cx,y2:cy,stroke:COL.ln,'stroke-width':1.5,...(da?{'stroke-dasharray':da}:{})}))})
+  }
+}
+
+function drawEmo(g){
+  D.em.forEach(em=>{
+    const a=fp(em.p1),b=fp(em.p2);if(!a||!b)return;
+    const col=COL.emo[em.type]||'#64748b';
+    const dx=b.x-a.x,dy=b.y-a.y,len=Math.sqrt(dx*dx+dy*dy);if(len<1)return;
+    const nx=dx/len,ny=dy/len,ox=-ny*8,oy=nx*8;
+    const sx=a.x+ox,sy=a.y+oy,ex=b.x+ox,ey=b.y+oy;
+    if(em.type==='peripheral'){g.appendChild(el('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:col,'stroke-width':1.5,'stroke-dasharray':'6 4'}))}
+    else if(em.type==='fraternal'){for(let i=-1;i<=1;i+=2){const d=i*2;g.appendChild(el('line',{x1:sx-ny*d,y1:sy+nx*d,x2:ex-ny*d,y2:ey+nx*d,stroke:col,'stroke-width':1.5}))}}
+    else if(em.type==='support'){for(let i=-1;i<=1;i++){const d=i*3;g.appendChild(el('line',{x1:sx-ny*d,y1:sy+nx*d,x2:ex-ny*d,y2:ey+nx*d,stroke:col,'stroke-width':1.3}))}}
+    else if(em.type==='enmeshed'){for(let i=-2;i<=2;i++){const d=i*2;g.appendChild(el('line',{x1:sx-ny*d,y1:sy+nx*d,x2:ex-ny*d,y2:ey+nx*d,stroke:col,'stroke-width':1.1}))}}
+    else if(em.type==='conflictive'||em.type==='hostile'){
+      const pts=[];const segs=Math.max(8,Math.floor(len/12));
+      for(let i=0;i<=segs;i++){const t=i/segs;const amp=(i%2===0?1:-1)*6;pts.push(`${sx+(ex-sx)*t-ny*amp},${sy+(ey-sy)*t+nx*amp}`)}
+      g.appendChild(el('polyline',{points:pts.join(' '),fill:'none',stroke:col,'stroke-width':2}));
+      if(em.type==='hostile'){const mx2=(sx+ex)/2,my2=(sy+ey)/2;g.appendChild(el('line',{x1:mx2-ny*8,y1:my2+nx*8,x2:mx2+ny*8,y2:my2-nx*8,stroke:col,'stroke-width':2.5}))}}
+  })
+}
+
+function render(){
+  const defs=$('cv').querySelector('defs');defs.querySelectorAll('clipPath[id^=spa]').forEach(c=>c.remove());
+  const g=$('dg');g.innerHTML='';g.setAttribute('transform',`translate(${D.px},${D.py}) scale(${D.z})`);
+  D.u.forEach(u=>drawUnion(g,u));drawChildren(g);drawEmo(g);D.p.forEach(p=>drawNode(g,p));
+  renderList();renderRels();
+}
+
+function renderList(){
+  const l=$('pList');l.innerHTML='';
+  const tl={pregnancy:'Embarazo',miscarriage:'Ab.Esp.',abortion:'Ab.Prov.'};
+  D.p.forEach(p=>{const a=age(p.dob,p.alive?null:p.dod);
+    const li=document.createElement('li');li.className='pitem'+(D.sel===p.id?' sel':'');
+    let ex='';if(p.spa)ex+='<span class="t" style="background:#fee2e2;color:#dc2626">SPA</span>';
+    if(p.psych)ex+='<span class="t" style="background:#ede9fe;color:#7c3aed">Psic</span>';
+    if(p.type&&p.type!=='normal')ex+=`<span class="t">${tl[p.type]||''}</span>`;
+    const tgs=(p.tags||[]).map(t=>`<span class="t">${esc(t)}</span>`).join('');
+    li.innerHTML=`<div class="dot ${p.gender} ${!p.alive?'dead':''} ${p.proband?'prob':''}"></div>
+      <div class="inf"><div class="nm">${esc(p.name)}${p.proband?' *':''}</div>
+      <div class="sub"><span>${a!=null?(p.alive?a+' años':'† '+a+' años'):''}</span>${tgs}${ex}</div></div>
+      <div class="act"><button onclick="event.stopPropagation();openPersonModal(${p.id})"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+      <button onclick="event.stopPropagation();delP(${p.id})"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button></div>`;
+    li.onclick=()=>selP(p.id);l.appendChild(li)});
+}
+
+function renderRels(){
+  const d=$('rList');const eml={peripheral:'Periférica',fraternal:'Fraterna',support:'Red apoyo',enmeshed:'Enmarañada',conflictive:'Conflictiva',hostile:'Hostil'};
+  if(!D.u.length&&!D.em.length){d.innerHTML='<p>Sin relaciones.</p>';return}
+  let h='<ul style="list-style:none">';
+  D.u.forEach(u=>{const ch=D.ch.filter(c=>c.uid===u.id);
+    h+=`<li style="padding:3px 0;display:flex;align-items:center;justify-content:space-between"><span>${esc(ulbl(u))}${ch.length?' — '+ch.length+' hijo(s)':''}</span><button onclick="delU(${u.id})" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:15px;padding:4px;min-width:28px;min-height:28px">×</button></li>`});
+  D.em.forEach(e=>{const a=fp(e.p1),b=fp(e.p2);if(!a||!b)return;
+    h+=`<li style="padding:3px 0;display:flex;align-items:center;justify-content:space-between"><span style="color:${COL.emo[e.type]}">${a.name.split(' ')[0]} ↔ ${b.name.split(' ')[0]} (${eml[e.type]||e.type})</span><button onclick="delEm(${e.id})" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:15px;padding:4px;min-width:28px;min-height:28px">×</button></li>`});
+  h+='</ul>';d.innerHTML=h}
+
+/* ── PERSON CRUD ── */
+function openPersonModal(id){
+  if(id){const p=fp(id);if(!p)return;$('mPTitle').textContent='Editar Persona';$('eId').value=id;
+    $('iName').value=p.name;$('iDob').value=p.dob||'';$('iGen').value=p.gender;$('iAlive').value=p.alive?'1':'0';
+    $('iDod').value=p.dod||'';$('iDod').disabled=p.alive;$('iProb').checked=!!p.proband;$('iType').value=p.type||'normal';
+    $('iSPA').checked=!!p.spa;$('iPsy').checked=!!p.psych;$('iNotes').value=p.notes||'';tags=p.tags?[...p.tags]:[];
+  }else{$('mPTitle').textContent='Agregar Persona';$('eId').value='';$('iName').value='';$('iDob').value='';
+    $('iGen').value='male';$('iAlive').value='1';$('iDod').value='';$('iDod').disabled=true;$('iProb').checked=false;
+    $('iType').value='normal';$('iSPA').checked=false;$('iPsy').checked=false;$('iNotes').value='';tags=[]}
+  drawTags();openM('mPerson');setTimeout(()=>$('iName').focus(),200)}
+
+function savePerson(){
+  const name=$('iName').value.trim();if(!name){toast('Nombre requerido');return}
+  const o={name,dob:$('iDob').value,gender:$('iGen').value,alive:$('iAlive').value==='1',dod:$('iAlive').value==='1'?'':$('iDod').value,
+    proband:$('iProb').checked,type:$('iType').value,spa:$('iSPA').checked,psych:$('iPsy').checked,notes:$('iNotes').value.trim(),tags:[...tags]};
+  const eid=$('eId').value;
+  if(eid){const p=fp(+eid);if(p)Object.assign(p,o)}
+  else{const r=$('stage').getBoundingClientRect();const cx=(r.width/2-D.px)/D.z,cy=(r.height/2-D.py)/D.z;
+    D.p.push({id:D.nid++,...o,x:cx+(Math.random()-.5)*80+D.p.length*15,y:cy+(Math.random()-.5)*60})}
+  closeM('mPerson');render();toast(eid?'Actualizado':'Agregado')}
+
+function delP(id){if(!confirm('¿Eliminar persona?'))return;
+  D.p=D.p.filter(p=>p.id!==id);D.ch=D.ch.filter(c=>c.cid!==id);
+  const au=D.u.filter(u=>u.p1===id||u.p2===id).map(u=>u.id);
+  D.ch=D.ch.filter(c=>!au.includes(c.uid));D.u=D.u.filter(u=>u.p1!==id&&u.p2!==id);
+  D.em=D.em.filter(e=>e.p1!==id&&e.p2!==id);if(D.sel===id)D.sel=null;render();toast('Eliminado')}
+
+function selP(id){if(D.mode==='relation'||D.mode==='emotional'){modeClick(id);return}D.sel=D.sel===id?null:id;render()}
+
+/* ── MODE (relation/emotional) ── */
+function startMode(m){if(D.p.length<2){toast('Necesitas 2+ personas');return}
+  D.mode=m;D.mf=null;$('modeBar').classList.add('active');
+  $('modeTxt').textContent=m==='relation'?'Haz clic en 2 personas para conectarlas':'Haz clic en 2 personas para relación emocional';
+  $('btn'+(m==='relation'?'Rel':'Emo')).classList.add('on')}
+
+function modeClick(id){
+  if(!D.mf){D.mf=id;D.sel=id;$('modeTxt').textContent='Ahora haz clic en la 2da persona';render()}
+  else{if(id===D.mf){toast('Selecciona otra persona');return}
+    if(D.mode==='relation'){
+      if(D.u.some(u=>(u.p1===D.mf&&u.p2===id)||(u.p1===id&&u.p2===D.mf))){toast('Ya existe');cancelMode();return}
+      $('rP1').value=D.mf;$('rP2').value=id;openM('mRel')}
+    else{$('eP1').value=D.mf;$('eP2').value=id;openM('mEmo')}
+    cancelMode()}}
+
+function cancelMode(){D.mode='select';D.mf=null;$('modeBar').classList.remove('active');
+  $('btnRel').classList.remove('on');$('btnEmo').classList.remove('on');render()}
+
+function saveRel(){D.u.push({id:D.nid++,p1:+$('rP1').value,p2:+$('rP2').value,type:$('rType').value});closeM('mRel');render();toast('Relación creada')}
+function delU(id){if(!confirm('¿Eliminar?'))return;D.u=D.u.filter(u=>u.id!==id);D.ch=D.ch.filter(c=>c.uid!==id);render();toast('Eliminada')}
+function saveEmo(){D.em.push({id:D.nid++,p1:+$('eP1').value,p2:+$('eP2').value,type:$('eType').value});closeM('mEmo');render();toast('Rel. emocional creada')}
+function delEm(id){D.em=D.em.filter(e=>e.id!==id);render();toast('Eliminada')}
+
+/* ── CHILD ── */
+function startChildMode(){if(!D.u.length){toast('Crea una relación primero');return}
+  if(D.p.length<3){toast('Agrega al menos 3 personas');return}
+  const us=$('cUnion');us.innerHTML='';D.u.forEach(u=>{const o=document.createElement('option');o.value=u.id;o.textContent=ulbl(u);us.appendChild(o)});
+  const cs=$('cPerson');cs.innerHTML='';D.p.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;cs.appendChild(o)});
+  openM('mChild')}
+function saveChild(){const uid=+$('cUnion').value,cid=+$('cPerson').value;
+  const u=D.u.find(u=>u.id===uid);if(u&&(u.p1===cid||u.p2===cid)){toast('No puede ser padre e hijo');return}
+  if(D.ch.some(c=>c.uid===uid&&c.cid===cid)){toast('Ya existe');return}
+  D.ch.push({uid,cid,type:$('cType').value});closeM('mChild');render();toast('Vinculado')}
+
+/* ── ALIVE TOGGLE ── */
+$('iAlive').addEventListener('change',function(){$('iDod').disabled=this.value==='1';if(this.value==='1')$('iDod').value=''});
+
+/* ── CANVAS INTERACTION ── */
+const cv=$('cv');let isPan=false,ps={x:0,y:0},isDrag=false,dragT=null,dragO={x:0,y:0},tDist=null;
+const dragLine=$('dragLine');
+
+function s2svg(sx,sy){const r=cv.getBoundingClientRect();return{x:(sx-r.left-D.px)/D.z,y:(sy-r.top-D.py)/D.z}}
+
+cv.addEventListener('mousedown',e=>{const n=e.target.closest('.node');
+  if(n){const p=fp(+n.getAttribute('data-id'));if(!p)return;isDrag=true;dragT=p;const pt=s2svg(e.clientX,e.clientY);dragO.x=pt.x-p.x;dragO.y=pt.y-p.y;cv.classList.add('grabbing');selP(p.id);e.preventDefault();return}
+  isPan=true;ps.x=e.clientX-D.px;ps.y=e.clientY-D.py;cv.style.cursor='grabbing'});
+cv.addEventListener('mousemove',e=>{
+  if(isDrag&&dragT){const pt=s2svg(e.clientX,e.clientY);dragT.x=pt.x-dragO.x;dragT.y=pt.y-dragO.y;render()}
+  else if(isPan){D.px=e.clientX-ps.x;D.py=e.clientY-ps.y;render()}});
+cv.addEventListener('mouseup',()=>{isDrag=false;dragT=null;isPan=false;cv.classList.remove('grabbing');cv.style.cursor=''});
+cv.addEventListener('mouseleave',()=>{isDrag=false;dragT=null;isPan=false;cv.classList.remove('grabbing');cv.style.cursor=''});
+cv.addEventListener('dblclick',e=>{const n=e.target.closest('.node');if(n)openPersonModal(+n.getAttribute('data-id'))});
+cv.addEventListener('wheel',e=>{e.preventDefault();const d=e.deltaY>0?-.1:.1;const nz=Math.max(.2,Math.min(3,D.z+d));const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;D.px=mx-(mx-D.px)*(nz/D.z);D.py=my-(my-D.py)*(nz/D.z);D.z=nz;render()},{passive:false});
+
+/* Touch */
+cv.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){const n=e.target.closest('.node');
+    if(n){const p=fp(+n.getAttribute('data-id'));if(!p)return;isDrag=true;dragT=p;const pt=s2svg(e.touches[0].clientX,e.touches[0].clientY);dragO.x=pt.x-p.x;dragO.y=pt.y-p.y;selP(p.id)}
+    else{isPan=true;ps.x=e.touches[0].clientX-D.px;ps.y=e.touches[0].clientY-D.py}}
+  else if(e.touches.length===2){tDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)}
+  e.preventDefault()},{passive:false});
+cv.addEventListener('touchmove',e=>{
+  if(e.touches.length===1){if(isDrag&&dragT){const pt=s2svg(e.touches[0].clientX,e.touches[0].clientY);dragT.x=pt.x-dragO.x;dragT.y=pt.y-dragO.y;render()}
+    else if(isPan){D.px=e.touches[0].clientX-ps.x;D.py=e.touches[0].clientY-ps.y;render()}}
+  else if(e.touches.length===2&&tDist){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);D.z=Math.max(.2,Math.min(3,D.z*(d/tDist)));tDist=d;render()}
+  e.preventDefault()},{passive:false});
+cv.addEventListener('touchend',()=>{isDrag=false;dragT=null;isPan=false;tDist=null});
+
+function zoomIn(){D.z=Math.min(3,D.z+.2);render()}
+function zoomOut(){D.z=Math.max(.2,D.z-.2);render()}
+function resetView(){D.z=1;D.px=0;D.py=0;render()}
+
+/* ── AUTO LAYOUT ── */
+function autoLayout(){if(!D.p.length)return;const g=aGen();const gg={};for(const[pid,gen]of Object.entries(g)){if(!gg[gen])gg[gen]=[];gg[gen].push(+pid)}
+  const sg=Object.keys(gg).map(Number).sort((a,b)=>a-b);const r=$('stage').getBoundingClientRect();const gx=150,gy=160;
+  sg.forEach((gen,i)=>{const m=gg[gen];const tw=(m.length-1)*gx;const sx=(r.width/2-D.px)/D.z-tw/2;
+    m.forEach((id,j)=>{const p=fp(id);if(p){p.x=sx+j*gx;p.y=100+i*gy}})});render();toast('Organizado')}
+function aGen(){const g={},po={};D.ch.forEach(c=>{const u=D.u.find(u=>u.id===c.uid);if(u){if(!po[c.cid])po[c.cid]=[];po[c.cid].push(u.p1,u.p2)}});
+  function gg(id,v){if(g[id]!=null)return g[id];if(v.has(id))return 0;v.add(id);const p=po[id];if(!p||!p.length){g[id]=0;return 0}let mx=-1;for(const par of p)mx=Math.max(mx,gg(par,v));g[id]=mx+1;return g[id]}
+  D.p.forEach(p=>gg(p.id,new Set()));D.u.forEach(u=>{const mg=Math.min(g[u.p1]||0,g[u.p2]||0);g[u.p1]=mg;g[u.p2]=mg});return g}
+
+/* ── SAVE/LOAD ── */
+function pack(){return{v:'4',p:D.p,u:D.u,ch:D.ch,em:D.em,nid:D.nid}}
+function unpack(d){D.p=(d.p||d.persons||[]).map(p=>({...p,tags:p.tags||[],proband:!!p.proband,type:p.type||'normal',spa:!!p.spa,psych:!!p.psych}));
+  D.u=(d.u||d.unions||[]).map(u=>({id:u.id,p1:u.p1||u.person1Id,p2:u.p2||u.person2Id,type:u.type}));
+  D.ch=(d.ch||d.childLinks||[]).map(c=>({uid:c.uid||c.unionId,cid:c.cid||c.childId,type:c.type}));
+  D.em=d.em||d.emotionals||[];D.nid=d.nid||d.nextId||Math.max(0,...D.p.map(p=>p.id),...D.u.map(u=>u.id),...D.em.map(e=>e.id))+1;D.sel=null;render()}
+function saveLocal(){localStorage.setItem('geno4',JSON.stringify(pack()));toast('Guardado')}
+function loadLocal(){const r=localStorage.getItem('geno4');if(!r){toast('Sin datos');return}try{unpack(JSON.parse(r));toast('Cargado')}catch{toast('Error')}}
+
+/* ── EXPORT/IMPORT ── */
+function dl(n,c,t){const b=new Blob([c],{type:t});const a=document.createElement('a');a.download=n;a.href=URL.createObjectURL(b);a.click();URL.revokeObjectURL(a.href)}
+function expJSON(){if(!D.p.length){toast('Sin datos');return}dl(`genograma_${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({...pack(),date:new Date().toISOString()},null,2),'application/json');toast('JSON exportado')}
+function impJSON(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{unpack(JSON.parse(ev.target.result));toast('JSON importado')}catch{toast('JSON inválido')}};r.readAsText(f);e.target.value=''}
+function cf(v){return(v+'').includes(',')||(v+'').includes('"')||(v+'').includes('\n')?'"'+(v+'').replace(/"/g,'""')+'"':v+''}
+function expCSV(){if(!D.p.length){toast('Sin datos');return}
+  let c='# PERSONAS\nid,nombre,nacimiento,genero,vivo,fallecimiento,consultante,tipo,spa,psicopatologia,etiquetas,notas,x,y\n';
+  D.p.forEach(p=>{c+=[p.id,cf(p.name),p.dob||'',p.gender,p.alive,p.dod||'',!!p.proband,p.type||'normal',!!p.spa,!!p.psych,cf((p.tags||[]).join('|')),cf(p.notes||''),Math.round(p.x),Math.round(p.y)].join(',')+'\n'});
+  c+='\n# RELACIONES\nid,persona1,persona2,tipo\n';D.u.forEach(u=>{c+=[u.id,u.p1,u.p2,u.type].join(',')+'\n'});
+  c+='\n# HIJOS\nunion_id,hijo_id,tipo\n';D.ch.forEach(ch=>{c+=[ch.uid,ch.cid,ch.type].join(',')+'\n'});
+  c+='\n# EMOCIONALES\nid,persona1,persona2,tipo\n';D.em.forEach(e=>{c+=[e.id,e.p1,e.p2,e.type].join(',')+'\n'});
+  dl(`genograma_${new Date().toISOString().slice(0,10)}.csv`,c,'text/csv');toast('CSV exportado')}
+function pcsv(l){const r=[];let c='',q=false;for(let i=0;i<l.length;i++){if(q){if(l[i]==='"'&&l[i+1]==='"'){c+='"';i++}else if(l[i]==='"')q=false;else c+=l[i]}else{if(l[i]==='"')q=true;else if(l[i]===','){r.push(c);c=''}else c+=l[i]}}r.push(c);return r}
+function impCSV(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{
+  const secs=ev.target.result.split(/\n# /);let p=[],u=[],ch=[],em=[];
+  for(const s of secs){const ls=s.trim().split('\n').filter(l=>l.trim()&&!l.startsWith('#'));if(ls.length<2)continue;const h=ls[0].toLowerCase();
+    if(h.includes('nombre')){for(let i=1;i<ls.length;i++){const c=pcsv(ls[i]);if(c.length<5)continue;
+      p.push({id:+c[0],name:c[1],dob:c[2]||'',gender:c[3]||'other',alive:c[4]==='true',dod:c[5]||'',proband:c[6]==='true',type:c[7]||'normal',spa:c[8]==='true',psych:c[9]==='true',tags:c[10]?c[10].split('|').filter(t=>t):[],notes:c[11]||'',x:+c[12]||200+p.length*120,y:+c[13]||200})}}
+    else if(h.includes('relacion')){for(let i=1;i<ls.length;i++){const c=pcsv(ls[i]);if(c.length<4)continue;u.push({id:+c[0],p1:+c[1],p2:+c[2],type:c[3]})}}
+    else if(h.includes('hijo')){for(let i=1;i<ls.length;i++){const c=pcsv(ls[i]);if(c.length<3)continue;ch.push({uid:+c[0],cid:+c[1],type:c[2]})}}
+    else if(h.includes('emocional')){for(let i=1;i<ls.length;i++){const c=pcsv(ls[i]);if(c.length<4)continue;em.push({id:+c[0],p1:+c[1],p2:+c[2],type:c[3]})}}}
+  if(!p.length)throw 0;unpack({p,u,ch,em});toast('CSV importado')}catch{toast('CSV inválido')}};r.readAsText(f);e.target.value=''}
+
+/* PNG/SVG */
+function cloneSVG(){const sv=$('cv'),dg=$('dg');const ot=dg.getAttribute('transform');dg.setAttribute('transform','translate(0,0) scale(1)');
+  const bb=dg.getBBox();const pd=80,w=bb.width+pd*2,h=bb.height+pd*2;const c=sv.cloneNode(true);
+  c.setAttribute('width',w);c.setAttribute('height',h);c.setAttribute('viewBox',`${bb.x-pd} ${bb.y-pd} ${w} ${h}`);
+  c.querySelector('.gridbg')?.setAttribute('fill','#fff');c.querySelector('#dg')?.setAttribute('transform','translate(0,0) scale(1)');
+  c.querySelector('.drag-line')?.remove();dg.setAttribute('transform',ot);return{c,w,h}}
+function expPNG(){if(!D.p.length){toast('Sin datos');return}const{c,w,h}=cloneSVG();
+  let str=new XMLSerializer().serializeToString(c).replace(/font-family="inherit"/g,'font-family="Segoe UI,system-ui,sans-serif"');
+  const img=new Image();const b=new Blob([str],{type:'image/svg+xml;charset=utf-8'});const u=URL.createObjectURL(b);
+  img.onload=()=>{const s=2,cv2=document.createElement('canvas');cv2.width=w*s;cv2.height=h*s;const ctx=cv2.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv2.width,cv2.height);ctx.drawImage(img,0,0,cv2.width,cv2.height);URL.revokeObjectURL(u);
+    const a=document.createElement('a');a.download='genograma.png';a.href=cv2.toDataURL('image/png');a.click();toast('PNG exportado')};img.src=u}
+function expSVG(){if(!D.p.length){toast('Sin datos');return}const{c}=cloneSVG();
+  dl('genograma.svg','<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(c).replace(/font-family="inherit"/g,'font-family="Segoe UI,system-ui,sans-serif"'),'image/svg+xml');toast('SVG exportado')}
+function doPrint(){if(!D.p.length){toast('Sin datos');return}const dg=$('dg'),sv=$('cv');const ot=dg.getAttribute('transform');
+  const bb=dg.getBBox();const p=40;sv.setAttribute('viewBox',`${bb.x-p} ${bb.y-p} ${bb.width+p*2} ${bb.height+p*2}`);dg.setAttribute('transform','translate(0,0) scale(1)');
+  window.print();sv.removeAttribute('viewBox');dg.setAttribute('transform',ot)}
+function clearAll(){if(!confirm('¿Borrar todo?'))return;D.p=[];D.u=[];D.ch=[];D.em=[];D.sel=null;D.nid=1;render();toast('Limpiado')}
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(D.mode!=='select')cancelMode();closeM('mPerson');closeM('mRel');closeM('mEmo');closeM('mChild')}
+  if(e.key==='Delete'&&D.sel&&!document.querySelector('.modal-bg.on'))delP(D.sel)});
+
+/* ── INIT ── */
+render();
+const saved=localStorage.getItem('geno4');
+if(saved){try{const d=JSON.parse(saved);if((d.p||d.persons)&&(d.p||d.persons).length)unpack(d)}catch{}}
+if(window.innerWidth>=900)$('panel').classList.add('open');
+</script>
+</body>
+</html>
