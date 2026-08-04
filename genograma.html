@@ -11,13 +11,21 @@
   --primary:#3b82f6;--primary-hover:#2563eb;--danger:#ef4444;--success:#22c55e;
   --male:#dbeafe;--male-border:#3b82f6;--female:#fce7f3;--female-border:#ec4899;
   --other:#fef3c7;--other-border:#f59e0b;--deceased:#d1d5db;
-  --sidebar-w:320px;--toolbar-h:56px;
+  --label-bg:#fef3c7;--label-border:#f59e0b;--label-text:#92400e;
+  --sidebar-w:340px;--toolbar-h:56px;--footer-h:36px;
 }
 html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 
+/* Header description */
+.app-header{background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:#fff;padding:10px 20px;font-size:13px;line-height:1.5;display:flex;align-items:center;gap:12px}
+.app-header .info-icon{width:20px;height:20px;flex-shrink:0;opacity:.8}
+.app-header p{margin:0;opacity:.92}
+.app-header .close-header{background:none;border:none;color:#fff;cursor:pointer;opacity:.6;font-size:18px;margin-left:auto;padding:0 4px;flex-shrink:0}
+.app-header .close-header:hover{opacity:1}
+
 /* Toolbar */
-.toolbar{height:var(--toolbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:8px;z-index:10;position:relative}
-.toolbar h1{font-size:18px;font-weight:700;margin-right:16px;white-space:nowrap}
+.toolbar{height:var(--toolbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:8px;z-index:10;position:relative;flex-shrink:0}
+.toolbar h1{font-size:18px;font-weight:700;margin-right:12px;white-space:nowrap}
 .toolbar h1 span{color:var(--primary)}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn:hover{background:#f1f5f9;border-color:#cbd5e1}
@@ -26,12 +34,24 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .btn.danger{color:var(--danger);border-color:var(--danger)}
 .btn.danger:hover{background:#fef2f2}
 .btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn.success{background:#16a34a;color:#fff;border-color:#16a34a}
+.btn.success:hover{background:#15803d}
 .btn svg{width:16px;height:16px;fill:currentColor}
 .toolbar-sep{width:1px;height:28px;background:var(--border);margin:0 4px}
 .toolbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
 
+/* Dropdown menu */
+.dropdown{position:relative;display:inline-flex}
+.dropdown-menu{position:absolute;top:100%;left:0;margin-top:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:50;min-width:160px;padding:4px;display:none}
+.dropdown-menu.open{display:block}
+.dropdown-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border:none;background:none;color:var(--text);font-size:13px;cursor:pointer;border-radius:6px;text-align:left}
+.dropdown-menu button:hover{background:#f1f5f9}
+.dropdown-menu button svg{width:16px;height:16px;fill:currentColor;flex-shrink:0}
+.dropdown-menu hr{border:none;border-top:1px solid var(--border);margin:4px 0}
+
 /* Layout */
-.app{display:flex;height:calc(100vh - var(--toolbar-h))}
+.app-body{display:flex;height:calc(100vh - var(--toolbar-h) - var(--footer-h));flex:1;overflow:hidden}
+.app-body.has-header{height:calc(100vh - var(--toolbar-h) - var(--footer-h) - 46px)}
 .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:5}
 .sidebar.collapsed{width:0;min-width:0;overflow:hidden}
 .sidebar-section{padding:16px;border-bottom:1px solid var(--border)}
@@ -45,24 +65,36 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .form-group textarea{resize:vertical;min-height:40px}
 .form-row{display:flex;gap:10px}
 .form-row .form-group{flex:1}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px}
+.checkbox-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary)}
 
 .person-list{list-style:none}
 .person-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;transition:background .15s;font-size:13px}
 .person-item:hover{background:#f1f5f9}
 .person-item.selected{background:#dbeafe}
-.person-item .symbol{width:20px;height:20px;border:2px solid;border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px}
+.person-item .symbol{width:20px;height:20px;border:2px solid;border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;position:relative}
 .person-item .symbol.male{background:var(--male);border-color:var(--male-border);border-radius:2px}
 .person-item .symbol.female{background:var(--female);border-color:var(--female-border);border-radius:50%}
 .person-item .symbol.other{background:var(--other);border-color:var(--other-border);transform:rotate(45deg);border-radius:2px}
 .person-item .symbol.deceased{background:var(--deceased);opacity:.7}
+.person-item .symbol.proband{box-shadow:0 0 0 3px var(--surface),0 0 0 5px currentColor}
 .person-item .info{flex:1;min-width:0}
 .person-item .info .name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.person-item .info .age{font-size:11px;color:var(--text-secondary)}
+.person-item .info .meta{font-size:11px;color:var(--text-secondary);display:flex;gap:6px;flex-wrap:wrap}
+.person-item .info .tag{background:var(--label-bg);color:var(--label-text);padding:1px 5px;border-radius:3px;font-size:10px;font-weight:600}
 .person-item .actions{display:flex;gap:2px;opacity:0;transition:opacity .15s}
 .person-item:hover .actions{opacity:1}
 .person-item .actions button{background:none;border:none;cursor:pointer;padding:4px;border-radius:4px;color:var(--text-secondary);display:flex}
 .person-item .actions button:hover{background:#e2e8f0;color:var(--text)}
 .person-item .actions button svg{width:14px;height:14px;fill:currentColor}
+
+/* Tags input */
+.tags-container{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);min-height:36px;cursor:text}
+.tags-container:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.tags-container .tag{display:inline-flex;align-items:center;gap:3px;background:var(--label-bg);color:var(--label-text);border:1px solid var(--label-border);padding:2px 6px;border-radius:4px;font-size:12px;font-weight:500}
+.tags-container .tag button{background:none;border:none;color:var(--label-text);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;opacity:.7}
+.tags-container .tag button:hover{opacity:1}
+.tags-container input{border:none;outline:none;background:none;font-size:13px;color:var(--text);flex:1;min-width:80px;padding:2px 0}
 
 /* Canvas */
 .canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
@@ -74,8 +106,8 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .canvas-wrap svg .node.dragging{cursor:grabbing}
 
 /* Legend */
-.legend{position:absolute;bottom:12px;left:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:11px;display:flex;gap:16px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:4;max-width:calc(100% - 24px)}
-.legend-item{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.legend{position:absolute;bottom:12px;left:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:11px;display:flex;gap:14px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:4;max-width:calc(100% - 24px)}
+.legend-item{display:flex;align-items:center;gap:5px;white-space:nowrap}
 .legend-symbol{width:18px;height:18px;display:flex;align-items:center;justify-content:center}
 .legend-symbol svg{width:18px;height:18px}
 
@@ -86,26 +118,35 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.active{opacity:1;pointer-events:auto}
-.modal{background:var(--surface);border-radius:12px;padding:24px;width:90%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:transform .2s}
+.modal{background:var(--surface);border-radius:12px;padding:24px;width:90%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(20px);transition:transform .2s;max-height:90vh;overflow-y:auto}
 .modal-overlay.active .modal{transform:translateY(0)}
 .modal h2{font-size:18px;margin-bottom:16px}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
 
 /* Toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:200;transition:transform .3s;pointer-events:none}
+.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:200;transition:transform .3s;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Footer */
+.app-footer{height:var(--footer-h);background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:12px;letter-spacing:.3px;flex-shrink:0}
+.app-footer a{color:#fbbf24;text-decoration:none;font-weight:600}
+.app-footer a:hover{color:#fde68a}
+
+/* Hidden file input */
+.hidden-input{display:none}
 
 /* Responsive */
 @media(max-width:768px){
   .sidebar{position:absolute;left:0;top:0;height:100%;z-index:20;box-shadow:4px 0 20px rgba(0,0,0,.15)}
   .sidebar.collapsed{width:0}
   .toolbar h1 span{display:none}
+  .toolbar-right .btn-label{display:none}
 }
 
 /* Print */
 @media print{
-  .toolbar,.sidebar,.legend,.zoom-controls,.toast{display:none!important}
-  .app{display:block}
+  .toolbar,.sidebar,.legend,.zoom-controls,.toast,.app-header,.app-footer,.dropdown-menu{display:none!important}
+  .app-body{display:block;height:auto!important}
   .canvas-wrap{position:static;width:100%;height:auto}
   .canvas-wrap svg{width:100%;height:auto}
   @page{size:landscape;margin:1cm}
@@ -114,6 +155,13 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 </style>
 </head>
 <body>
+
+<!-- Description header -->
+<div class="app-header" id="appHeader">
+  <svg class="info-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+  <p><strong>Genograma</strong> es una representaci&oacute;n gr&aacute;fica del &aacute;rbol geneal&oacute;gico que muestra la estructura familiar a trav&eacute;s de generaciones. Permite visualizar relaciones, patrones emocionales, eventos significativos y din&aacute;micas ocultas (heridas, traumas, repeticiones) utilizando s&iacute;mbolos universales estandarizados. Es una herramienta clave en terapia familiar, coaching sist&eacute;mico y constelaciones.</p>
+  <button class="close-header" onclick="document.getElementById('appHeader').style.display='none';document.querySelector('.app-body').classList.remove('has-header')" title="Cerrar">&times;</button>
+</div>
 
 <div class="toolbar">
   <button class="btn" onclick="toggleSidebar()" title="Panel lateral">
@@ -124,15 +172,15 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 
   <button class="btn" id="btnAddPerson" onclick="openPersonModal()">
     <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-    Persona
+    <span class="btn-label">Persona</span>
   </button>
   <button class="btn" id="btnAddRelation" onclick="startRelationMode()">
     <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-    Relación
+    <span class="btn-label">Relaci&oacute;n</span>
   </button>
   <button class="btn" id="btnAddChild" onclick="startChildMode()">
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-    Hijo/a
+    <span class="btn-label">Hijo/a</span>
   </button>
 
   <div class="toolbar-right">
@@ -140,24 +188,72 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
       <svg viewBox="0 0 24 24"><path d="M3 3v8h8V3H3zm6 6H5V5h4v4zm-6 4v8h8v-8H3zm6 6H5v-4h4v4zm4-16v8h8V3h-8zm6 6h-4V5h4v4zm-6 4v8h8v-8h-8zm6 6h-4v-4h4v4z"/></svg>
     </button>
     <div class="toolbar-sep"></div>
-    <button class="btn" onclick="saveToLocal()" title="Guardar">
-      <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-    </button>
-    <button class="btn" onclick="loadFromLocal()" title="Cargar">
-      <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
-    </button>
+
+    <!-- Import/Export dropdown -->
+    <div class="dropdown" id="dropdownFile">
+      <button class="btn" onclick="toggleDropdown('dropdownFile')">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+        <span class="btn-label">Archivo</span>
+        <svg viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:-2px"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+      <div class="dropdown-menu" id="dropdownFileMenu">
+        <button onclick="saveToLocal();closeDropdowns()">
+          <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+          Guardar en navegador
+        </button>
+        <button onclick="loadFromLocal();closeDropdowns()">
+          <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+          Cargar del navegador
+        </button>
+        <hr>
+        <button onclick="exportJSON();closeDropdowns()">
+          <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          Exportar JSON
+        </button>
+        <button onclick="exportCSV();closeDropdowns()">
+          <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          Exportar CSV
+        </button>
+        <hr>
+        <button onclick="document.getElementById('importJSON').click();closeDropdowns()">
+          <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>
+          Importar JSON
+        </button>
+        <button onclick="document.getElementById('importCSV').click();closeDropdowns()">
+          <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>
+          Importar CSV
+        </button>
+      </div>
+    </div>
+    <input type="file" id="importJSON" class="hidden-input" accept=".json" onchange="handleImportJSON(event)">
+    <input type="file" id="importCSV" class="hidden-input" accept=".csv" onchange="handleImportCSV(event)">
+
     <div class="toolbar-sep"></div>
-    <button class="btn" onclick="exportPNG()" title="Exportar PNG">
-      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-      PNG
-    </button>
-    <button class="btn" onclick="exportSVG()" title="Exportar SVG">
-      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-      SVG
-    </button>
-    <button class="btn" onclick="printDiagram()" title="Imprimir">
-      <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
-    </button>
+
+    <!-- Export image dropdown -->
+    <div class="dropdown" id="dropdownExport">
+      <button class="btn" onclick="toggleDropdown('dropdownExport')">
+        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <span class="btn-label">Imagen</span>
+        <svg viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:-2px"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+      <div class="dropdown-menu" id="dropdownExportMenu">
+        <button onclick="exportPNG();closeDropdowns()">
+          <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+          Exportar PNG
+        </button>
+        <button onclick="exportSVG();closeDropdowns()">
+          <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+          Exportar SVG
+        </button>
+        <hr>
+        <button onclick="printDiagram();closeDropdowns()">
+          <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+          Imprimir
+        </button>
+      </div>
+    </div>
+
     <div class="toolbar-sep"></div>
     <button class="btn danger" onclick="clearAll()" title="Limpiar todo">
       <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
@@ -165,7 +261,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
   </div>
 </div>
 
-<div class="app">
+<div class="app-body has-header" id="appBody">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-section">
       <h3>
@@ -198,9 +294,6 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
   <div class="canvas-wrap" id="canvasWrap">
     <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
-        </marker>
         <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
           <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
         </pattern>
@@ -219,12 +312,20 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
         Femenino
       </div>
       <div class="legend-item">
-        <div class="legend-symbol"><svg viewBox="0 0 20 20"><rect x="4" y="4" width="12" height="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="1" transform="rotate(45 10 10)"/></svg></div>
-        Otro
+        <div class="legend-symbol"><svg viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" rx="1"/><rect x="4.5" y="4.5" width="11" height="11" fill="none" stroke="#3b82f6" stroke-width="1.5" rx="1"/></svg></div>
+        Consultante (M)
+      </div>
+      <div class="legend-item">
+        <div class="legend-symbol"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/><circle cx="10" cy="10" r="5.5" fill="none" stroke="#ec4899" stroke-width="1.5"/></svg></div>
+        Consultante (F)
       </div>
       <div class="legend-item">
         <div class="legend-symbol"><svg viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="#d1d5db" stroke="#6b7280" stroke-width="2" rx="1"/><line x1="3" y1="3" x2="17" y2="17" stroke="#6b7280" stroke-width="2"/><line x1="17" y1="3" x2="3" y2="17" stroke="#6b7280" stroke-width="2"/></svg></div>
         Fallecido
+      </div>
+      <div class="legend-item">
+        <div class="legend-symbol"><svg viewBox="0 0 20 20"><rect x="1" y="6" width="18" height="8" rx="3" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/></svg></div>
+        Etiqueta
       </div>
       <div class="legend-item">
         <div class="legend-symbol"><svg viewBox="0 0 40 6"><line x1="0" y1="3" x2="40" y2="3" stroke="#64748b" stroke-width="2"/></svg></div>
@@ -232,11 +333,11 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
       </div>
       <div class="legend-item">
         <div class="legend-symbol"><svg viewBox="0 0 40 6"><line x1="0" y1="3" x2="40" y2="3" stroke="#64748b" stroke-width="2" stroke-dasharray="6 3"/></svg></div>
-        Unión libre
+        Uni&oacute;n libre
       </div>
       <div class="legend-item">
         <div class="legend-symbol"><svg viewBox="0 0 40 10"><line x1="0" y1="5" x2="40" y2="5" stroke="#64748b" stroke-width="2"/><line x1="17" y1="1" x2="23" y2="9" stroke="#64748b" stroke-width="2"/></svg></div>
-        Separación
+        Separaci&oacute;n
       </div>
       <div class="legend-item">
         <div class="legend-symbol"><svg viewBox="0 0 40 10"><line x1="0" y1="5" x2="40" y2="5" stroke="#64748b" stroke-width="2"/><line x1="15" y1="1" x2="21" y2="9" stroke="#64748b" stroke-width="2"/><line x1="19" y1="1" x2="25" y2="9" stroke="#64748b" stroke-width="2"/></svg></div>
@@ -258,6 +359,10 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
   </div>
 </div>
 
+<footer class="app-footer">
+  Creado con amor y luz por <a href="https://ciberpcia.com" target="_blank" rel="noopener">&nbsp;CiberPcIA&nbsp;</a> para la humanidad
+</footer>
+
 <!-- Person Modal -->
 <div class="modal-overlay" id="personModal">
   <div class="modal">
@@ -265,7 +370,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
     <input type="hidden" id="editPersonId">
     <div class="form-group">
       <label>Nombre completo</label>
-      <input type="text" id="personName" placeholder="Ej: Juan Pérez García" autofocus>
+      <input type="text" id="personName" placeholder="Ej: Juan P&eacute;rez Garc&iacute;a">
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -273,7 +378,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
         <input type="date" id="personDob">
       </div>
       <div class="form-group">
-        <label>Género</label>
+        <label>G&eacute;nero</label>
         <select id="personGender">
           <option value="male">Masculino</option>
           <option value="female">Femenino</option>
@@ -294,9 +399,24 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
         <input type="date" id="personDod" disabled>
       </div>
     </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="personProband">
+      <label for="personProband" style="text-transform:none;font-size:13px;font-weight:500;color:var(--text);margin:0;cursor:pointer">
+        Consultante / Persona principal (doble borde)
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Etiquetas personalizadas</label>
+      <div class="tags-container" id="tagsContainer" onclick="document.getElementById('tagInput').focus()">
+        <input type="text" id="tagInput" placeholder="Ej: PERAS, herida infancia... (Enter para agregar)">
+      </div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">
+        Usa etiquetas para marcar aspectos ocultos: heridas, traumas, patrones, PERAS, etc.
+      </div>
+    </div>
     <div class="form-group">
       <label>Notas (opcional)</label>
-      <textarea id="personNotes" rows="2" placeholder="Información adicional..."></textarea>
+      <textarea id="personNotes" rows="2" placeholder="Informaci&oacute;n adicional..."></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closePersonModal()">Cancelar</button>
@@ -308,15 +428,15 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 <!-- Relationship Modal -->
 <div class="modal-overlay" id="relationModal">
   <div class="modal">
-    <h2>Tipo de Relación</h2>
+    <h2>Tipo de Relaci&oacute;n</h2>
     <input type="hidden" id="relPerson1">
     <input type="hidden" id="relPerson2">
     <div class="form-group">
-      <label>Tipo de relación</label>
+      <label>Tipo de relaci&oacute;n</label>
       <select id="relationType">
         <option value="marriage">Matrimonio</option>
-        <option value="cohabitation">Unión libre</option>
-        <option value="separation">Separación</option>
+        <option value="cohabitation">Uni&oacute;n libre</option>
+        <option value="separation">Separaci&oacute;n</option>
         <option value="divorce">Divorcio</option>
       </select>
     </div>
@@ -332,7 +452,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
   <div class="modal">
     <h2>Agregar Hijo/a</h2>
     <div class="form-group">
-      <label>Padres (relación)</label>
+      <label>Padres (relaci&oacute;n)</label>
       <select id="childParentUnion"></select>
     </div>
     <div class="form-group">
@@ -340,9 +460,9 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
       <select id="childPerson"></select>
     </div>
     <div class="form-group">
-      <label>Tipo de filiación</label>
+      <label>Tipo de filiaci&oacute;n</label>
       <select id="childType">
-        <option value="biological">Biológico/a</option>
+        <option value="biological">Biol&oacute;gico/a</option>
         <option value="adopted">Adoptivo/a</option>
         <option value="foster">De crianza</option>
       </select>
@@ -366,7 +486,8 @@ const COLORS = {
   deceased: {fill:'#d1d5db',stroke:'#6b7280'},
   line: '#64748b',
   selected: '#3b82f6',
-  childLine: '#64748b'
+  childLine: '#64748b',
+  tag: {fill:'#fef3c7',stroke:'#f59e0b',text:'#92400e'}
 };
 
 const state = {
@@ -382,8 +503,61 @@ const state = {
   panY: 0
 };
 
+let currentTags = [];
 let isPanning = false, panStart = {x:0,y:0};
 let isDragging = false, dragTarget = null, dragOffset = {x:0,y:0};
+
+// Tags input
+const tagInput = document.getElementById('tagInput');
+tagInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && tagInput.value.trim()) {
+    e.preventDefault();
+    addTag(tagInput.value.trim());
+    tagInput.value = '';
+  }
+  if (e.key === 'Backspace' && !tagInput.value && currentTags.length > 0) {
+    currentTags.pop();
+    renderTags();
+  }
+});
+
+function addTag(text) {
+  if (currentTags.includes(text)) return;
+  currentTags.push(text);
+  renderTags();
+}
+
+function removeTag(idx) {
+  currentTags.splice(idx, 1);
+  renderTags();
+}
+
+function renderTags() {
+  const container = document.getElementById('tagsContainer');
+  container.querySelectorAll('.tag').forEach(t => t.remove());
+  currentTags.forEach((tag, i) => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.innerHTML = `${esc(tag)}<button onclick="removeTag(${i})">&times;</button>`;
+    container.insertBefore(span, tagInput);
+  });
+}
+
+// Dropdown menus
+function toggleDropdown(id) {
+  const menu = document.getElementById(id + 'Menu');
+  const wasOpen = menu.classList.contains('open');
+  closeDropdowns();
+  if (!wasOpen) menu.classList.add('open');
+}
+
+function closeDropdowns() {
+  document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.dropdown')) closeDropdowns();
+});
 
 function calcAge(dob, dod) {
   if (!dob) return null;
@@ -393,12 +567,6 @@ function calcAge(dob, dod) {
   const m = end.getMonth() - birth.getMonth();
   if (m < 0 || (m === 0 && end.getDate() < birth.getDate())) age--;
   return age;
-}
-
-function formatDate(d) {
-  if (!d) return '';
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('es', {day:'numeric',month:'short',year:'numeric'});
 }
 
 function findPerson(id) {
@@ -411,11 +579,10 @@ function getUnionLabel(u) {
   if (!p1 || !p2) return '?';
   const n1 = p1.name.split(' ')[0];
   const n2 = p2.name.split(' ')[0];
-  const types = {marriage:'Matrimonio',cohabitation:'Unión libre',separation:'Separación',divorce:'Divorcio'};
+  const types = {marriage:'Matrimonio',cohabitation:'Union libre',separation:'Separacion',divorce:'Divorcio'};
   return `${n1} & ${n2} (${types[u.type] || u.type})`;
 }
 
-// SVG helpers
 function svgEl(tag, attrs) {
   const el = document.createElementNS(SVG_NS, tag);
   for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v);
@@ -423,11 +590,12 @@ function svgEl(tag, attrs) {
 }
 
 function drawPersonNode(g, person) {
-  const {x, y, gender, alive, name, dob, dod, notes} = person;
+  const {x, y, gender, alive, name, dob, dod, notes, proband, tags} = person;
   const s = NODE_SIZE;
   const hs = s / 2;
   const colors = alive ? COLORS[gender] || COLORS.other : COLORS.deceased;
   const aliveBorder = (COLORS[gender] || COLORS.other).stroke;
+  const borderColor = alive ? aliveBorder : colors.stroke;
 
   const group = svgEl('g', {
     class: 'node' + (state.selectedId === person.id ? ' selected' : ''),
@@ -435,27 +603,51 @@ function drawPersonNode(g, person) {
     transform: `translate(${x},${y})`
   });
 
-  let shape;
   if (gender === 'male') {
-    shape = svgEl('rect', {
+    if (proband) {
+      const outer = svgEl('rect', {
+        x: -hs - 5, y: -hs - 5, width: s + 10, height: s + 10, rx: 3,
+        fill: 'none', stroke: borderColor, 'stroke-width': 2.5
+      });
+      group.appendChild(outer);
+    }
+    const shape = svgEl('rect', {
       x: -hs, y: -hs, width: s, height: s, rx: 3,
-      fill: colors.fill, stroke: alive ? aliveBorder : colors.stroke, 'stroke-width': 2.5,
+      fill: colors.fill, stroke: borderColor, 'stroke-width': 2.5,
       class: 'node-shape'
     });
+    group.appendChild(shape);
   } else if (gender === 'female') {
-    shape = svgEl('circle', {
+    if (proband) {
+      const outer = svgEl('circle', {
+        cx: 0, cy: 0, r: hs + 5,
+        fill: 'none', stroke: borderColor, 'stroke-width': 2.5
+      });
+      group.appendChild(outer);
+    }
+    const shape = svgEl('circle', {
       cx: 0, cy: 0, r: hs,
-      fill: colors.fill, stroke: alive ? aliveBorder : colors.stroke, 'stroke-width': 2.5,
+      fill: colors.fill, stroke: borderColor, 'stroke-width': 2.5,
       class: 'node-shape'
     });
+    group.appendChild(shape);
   } else {
-    shape = svgEl('rect', {
+    if (proband) {
+      const outer = svgEl('rect', {
+        x: -hs * 0.7 - 4, y: -hs * 0.7 - 4,
+        width: s * 0.7 + 8, height: s * 0.7 + 8, rx: 2,
+        fill: 'none', stroke: borderColor, 'stroke-width': 2.5,
+        transform: 'rotate(45)'
+      });
+      group.appendChild(outer);
+    }
+    const shape = svgEl('rect', {
       x: -hs * 0.7, y: -hs * 0.7, width: s * 0.7, height: s * 0.7, rx: 2,
-      fill: colors.fill, stroke: alive ? aliveBorder : colors.stroke, 'stroke-width': 2.5,
+      fill: colors.fill, stroke: borderColor, 'stroke-width': 2.5,
       transform: 'rotate(45)', class: 'node-shape'
     });
+    group.appendChild(shape);
   }
-  group.appendChild(shape);
 
   if (!alive) {
     const xLine1 = svgEl('line', {x1: -hs+4, y1: -hs+4, x2: hs-4, y2: hs-4, stroke: colors.stroke, 'stroke-width': 2.5});
@@ -464,30 +656,48 @@ function drawPersonNode(g, person) {
     group.appendChild(xLine2);
   }
 
-  const age = calcAge(dob, alive ? null : dod);
+  let textY = hs + 16;
   const nameText = svgEl('text', {
-    x: 0, y: hs + 16, 'text-anchor': 'middle',
+    x: 0, y: textY, 'text-anchor': 'middle',
     'font-size': '12', 'font-weight': '600', fill: '#1e293b', 'font-family': 'inherit'
   });
   nameText.textContent = name.length > 18 ? name.substring(0, 16) + '…' : name;
   group.appendChild(nameText);
 
-  let ageLabel = '';
-  if (age !== null) {
-    ageLabel = alive ? `${age} años` : `† ${age} años`;
-  }
+  const age = calcAge(dob, alive ? null : dod);
   if (dob) {
+    textY += 14;
     const ageText = svgEl('text', {
-      x: 0, y: hs + 30, 'text-anchor': 'middle',
+      x: 0, y: textY, 'text-anchor': 'middle',
       'font-size': '10', fill: '#64748b', 'font-family': 'inherit'
     });
-    ageText.textContent = ageLabel;
+    ageText.textContent = age !== null ? (alive ? `${age} años` : `† ${age} años`) : '';
     group.appendChild(ageText);
   }
 
+  if (tags && tags.length > 0) {
+    textY += 6;
+    for (const tag of tags) {
+      textY += 16;
+      const tw = Math.min(tag.length * 6.5 + 12, 120);
+      const tagBg = svgEl('rect', {
+        x: -tw / 2, y: textY - 11, width: tw, height: 15, rx: 4,
+        fill: COLORS.tag.fill, stroke: COLORS.tag.stroke, 'stroke-width': 1
+      });
+      group.appendChild(tagBg);
+      const tagText = svgEl('text', {
+        x: 0, y: textY, 'text-anchor': 'middle',
+        'font-size': '9', 'font-weight': '700', fill: COLORS.tag.text, 'font-family': 'inherit'
+      });
+      tagText.textContent = tag.length > 16 ? tag.substring(0, 14) + '…' : tag;
+      group.appendChild(tagText);
+    }
+  }
+
   if (notes) {
+    textY += 14;
     const notesText = svgEl('text', {
-      x: 0, y: hs + 42, 'text-anchor': 'middle',
+      x: 0, y: textY, 'text-anchor': 'middle',
       'font-size': '9', fill: '#94a3b8', 'font-style': 'italic', 'font-family': 'inherit'
     });
     notesText.textContent = notes.length > 22 ? notes.substring(0, 20) + '…' : notes;
@@ -521,13 +731,10 @@ function drawUnionLine(g, union) {
 
   const mx = (x1 + x2) / 2;
   if (union.type === 'separation') {
-    const sl = svgEl('line', {x1: mx - 3, y1: y - 6, x2: mx + 3, y2: y + 6, stroke: COLORS.line, 'stroke-width': 2});
-    g.appendChild(sl);
+    g.appendChild(svgEl('line', {x1: mx-3, y1: y-6, x2: mx+3, y2: y+6, stroke: COLORS.line, 'stroke-width': 2}));
   } else if (union.type === 'divorce') {
-    const sl1 = svgEl('line', {x1: mx - 5, y1: y - 6, x2: mx + 1, y2: y + 6, stroke: COLORS.line, 'stroke-width': 2});
-    const sl2 = svgEl('line', {x1: mx - 1, y1: y - 6, x2: mx + 5, y2: y + 6, stroke: COLORS.line, 'stroke-width': 2});
-    g.appendChild(sl1);
-    g.appendChild(sl2);
+    g.appendChild(svgEl('line', {x1: mx-5, y1: y-6, x2: mx+1, y2: y+6, stroke: COLORS.line, 'stroke-width': 2}));
+    g.appendChild(svgEl('line', {x1: mx-1, y1: y-6, x2: mx+5, y2: y+6, stroke: COLORS.line, 'stroke-width': 2}));
   }
 }
 
@@ -554,29 +761,26 @@ function drawChildLinks(g) {
 
     const barY = my + 50;
 
-    const vLine = svgEl('line', {x1: mx, y1: my, x2: mx, y2: barY, stroke: COLORS.childLine, 'stroke-width': 1.5});
-    g.appendChild(vLine);
+    g.appendChild(svgEl('line', {x1: mx, y1: my, x2: mx, y2: barY, stroke: COLORS.childLine, 'stroke-width': 1.5}));
 
     if (childPersons.length > 1) {
       const xs = childPersons.map(c => c.person.x).sort((a,b) => a - b);
-      const barLine = svgEl('line', {x1: xs[0], y1: barY, x2: xs[xs.length-1], y2: barY, stroke: COLORS.childLine, 'stroke-width': 1.5});
-      g.appendChild(barLine);
+      g.appendChild(svgEl('line', {x1: xs[0], y1: barY, x2: xs[xs.length-1], y2: barY, stroke: COLORS.childLine, 'stroke-width': 1.5}));
     }
 
     for (const cl of childPersons) {
       const cx = cl.person.x;
-      const cy = cl.person.y - hs - 2;
+      const cy = cl.person.y - hs - (cl.person.proband ? 7 : 2);
       let dasharray = '';
       if (cl.type === 'adopted') dasharray = '6 3';
       else if (cl.type === 'foster') dasharray = '2 3';
 
       const topX = childPersons.length === 1 ? mx : cx;
-      const vl = svgEl('line', {
+      g.appendChild(svgEl('line', {
         x1: topX, y1: barY, x2: cx, y2: cy,
         stroke: COLORS.childLine, 'stroke-width': 1.5,
         ...(dasharray ? {'stroke-dasharray': dasharray} : {})
-      });
-      g.appendChild(vl);
+      }));
     }
   }
 }
@@ -601,11 +805,18 @@ function renderPersonList() {
     const age = calcAge(p.dob, p.alive ? null : p.dod);
     const li = document.createElement('li');
     li.className = 'person-item' + (state.selectedId === p.id ? ' selected' : '');
+    let tagsHtml = '';
+    if (p.tags && p.tags.length) {
+      tagsHtml = p.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
+    }
     li.innerHTML = `
-      <div class="symbol ${p.gender} ${!p.alive ? 'deceased' : ''}"></div>
+      <div class="symbol ${p.gender} ${!p.alive ? 'deceased' : ''} ${p.proband ? 'proband' : ''}"></div>
       <div class="info">
-        <div class="name">${esc(p.name)}</div>
-        <div class="age">${age !== null ? (p.alive ? age + ' años' : '† ' + age + ' años') : ''}</div>
+        <div class="name">${esc(p.name)}${p.proband ? ' *' : ''}</div>
+        <div class="meta">
+          <span>${age !== null ? (p.alive ? age + ' años' : '† ' + age + ' años') : ''}</span>
+          ${tagsHtml}
+        </div>
       </div>
       <div class="actions">
         <button onclick="editPerson(${p.id})" title="Editar"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
@@ -659,7 +870,9 @@ function openPersonModal(id) {
     document.getElementById('personAlive').value = String(p.alive);
     document.getElementById('personDod').value = p.dod || '';
     document.getElementById('personDod').disabled = p.alive;
+    document.getElementById('personProband').checked = !!p.proband;
     document.getElementById('personNotes').value = p.notes || '';
+    currentTags = p.tags ? [...p.tags] : [];
   } else {
     title.textContent = 'Agregar Persona';
     document.getElementById('editPersonId').value = '';
@@ -669,8 +882,11 @@ function openPersonModal(id) {
     document.getElementById('personAlive').value = 'true';
     document.getElementById('personDod').value = '';
     document.getElementById('personDod').disabled = true;
+    document.getElementById('personProband').checked = false;
     document.getElementById('personNotes').value = '';
+    currentTags = [];
   }
+  renderTags();
   modal.classList.add('active');
   setTimeout(() => document.getElementById('personName').focus(), 100);
 }
@@ -686,7 +902,9 @@ function savePerson() {
   const gender = document.getElementById('personGender').value;
   const alive = document.getElementById('personAlive').value === 'true';
   const dod = alive ? '' : document.getElementById('personDod').value;
+  const proband = document.getElementById('personProband').checked;
   const notes = document.getElementById('personNotes').value.trim();
+  const tags = [...currentTags];
   const editId = document.getElementById('editPersonId').value;
 
   if (editId) {
@@ -694,6 +912,7 @@ function savePerson() {
     if (p) {
       p.name = name; p.dob = dob; p.gender = gender;
       p.alive = alive; p.dod = dod; p.notes = notes;
+      p.proband = proband; p.tags = tags;
     }
   } else {
     const canvasRect = document.getElementById('canvasWrap').getBoundingClientRect();
@@ -702,7 +921,7 @@ function savePerson() {
     const offset = state.persons.length * 30;
     state.persons.push({
       id: state.nextId++,
-      name, dob, gender, alive, dod, notes,
+      name, dob, gender, alive, dod, notes, proband, tags,
       x: cx + (Math.random() - 0.5) * 100 + offset,
       y: cy + (Math.random() - 0.5) * 80
     });
@@ -712,9 +931,7 @@ function savePerson() {
   showToast(editId ? 'Persona actualizada' : 'Persona agregada');
 }
 
-function editPerson(id) {
-  openPersonModal(id);
-}
+function editPerson(id) { openPersonModal(id); }
 
 function deletePerson(id) {
   if (!confirm('¿Eliminar esta persona y sus conexiones?')) return;
@@ -729,10 +946,7 @@ function deletePerson(id) {
 }
 
 function selectPerson(id) {
-  if (state.mode === 'relation') {
-    handleRelationClick(id);
-    return;
-  }
+  if (state.mode === 'relation') { handleRelationClick(id); return; }
   state.selectedId = state.selectedId === id ? null : id;
   render();
 }
@@ -767,9 +981,7 @@ function handleRelationClick(id) {
   }
 }
 
-function closeRelationModal() {
-  document.getElementById('relationModal').classList.remove('active');
-}
+function closeRelationModal() { document.getElementById('relationModal').classList.remove('active'); }
 
 function saveRelation() {
   const p1 = parseInt(document.getElementById('relPerson1').value);
@@ -792,10 +1004,6 @@ function deleteUnion(id) {
 // Child mode
 function startChildMode() {
   if (state.unions.length === 0) { showToast('Primero crea una relación entre dos personas'); return; }
-  const available = state.persons.filter(p => {
-    const isInUnion = state.unions.some(u => u.person1Id === p.id || u.person2Id === p.id);
-    return true;
-  });
   if (state.persons.length < 3 && state.unions.length > 0) {
     showToast('Agrega al menos un hijo/a primero');
     return;
@@ -822,9 +1030,7 @@ function startChildMode() {
   document.getElementById('childModal').classList.add('active');
 }
 
-function closeChildModal() {
-  document.getElementById('childModal').classList.remove('active');
-}
+function closeChildModal() { document.getElementById('childModal').classList.remove('active'); }
 
 function saveChild() {
   const unionId = parseInt(document.getElementById('childParentUnion').value);
@@ -858,7 +1064,7 @@ document.getElementById('personAlive').addEventListener('change', function() {
   if (this.value === 'true') document.getElementById('personDod').value = '';
 });
 
-// Drag & Drop
+// Drag & Drop + Pan
 const canvas = document.getElementById('canvas');
 
 canvas.addEventListener('mousedown', (e) => {
@@ -896,26 +1102,12 @@ canvas.addEventListener('mousemove', (e) => {
   }
 });
 
-canvas.addEventListener('mouseup', () => {
-  isDragging = false;
-  dragTarget = null;
-  isPanning = false;
-  canvas.classList.remove('grabbing');
-});
-
-canvas.addEventListener('mouseleave', () => {
-  isDragging = false;
-  dragTarget = null;
-  isPanning = false;
-  canvas.classList.remove('grabbing');
-});
+canvas.addEventListener('mouseup', () => { isDragging = false; dragTarget = null; isPanning = false; canvas.classList.remove('grabbing'); });
+canvas.addEventListener('mouseleave', () => { isDragging = false; dragTarget = null; isPanning = false; canvas.classList.remove('grabbing'); });
 
 canvas.addEventListener('dblclick', (e) => {
   const node = e.target.closest('.node');
-  if (node) {
-    const id = parseInt(node.getAttribute('data-id'));
-    openPersonModal(id);
-  }
+  if (node) openPersonModal(parseInt(node.getAttribute('data-id')));
 });
 
 canvas.addEventListener('wheel', (e) => {
@@ -932,7 +1124,7 @@ canvas.addEventListener('wheel', (e) => {
 }, {passive: false});
 
 // Touch support
-let touchStart = null, touchDist = null;
+let touchDist = null;
 canvas.addEventListener('touchstart', (e) => {
   if (e.touches.length === 1) {
     const node = e.target.closest('.node');
@@ -940,11 +1132,9 @@ canvas.addEventListener('touchstart', (e) => {
       const id = parseInt(node.getAttribute('data-id'));
       const person = findPerson(id);
       if (!person) return;
-      isDragging = true;
-      dragTarget = person;
+      isDragging = true; dragTarget = person;
       const pt = screenToSvg(e.touches[0].clientX, e.touches[0].clientY);
-      dragOffset.x = pt.x - person.x;
-      dragOffset.y = pt.y - person.y;
+      dragOffset.x = pt.x - person.x; dragOffset.y = pt.y - person.y;
       selectPerson(id);
     } else {
       isPanning = true;
@@ -961,8 +1151,7 @@ canvas.addEventListener('touchmove', (e) => {
   if (e.touches.length === 1) {
     if (isDragging && dragTarget) {
       const pt = screenToSvg(e.touches[0].clientX, e.touches[0].clientY);
-      dragTarget.x = pt.x - dragOffset.x;
-      dragTarget.y = pt.y - dragOffset.y;
+      dragTarget.x = pt.x - dragOffset.x; dragTarget.y = pt.y - dragOffset.y;
       render();
     } else if (isPanning) {
       state.panX = e.touches[0].clientX - panStart.x;
@@ -971,27 +1160,18 @@ canvas.addEventListener('touchmove', (e) => {
     }
   } else if (e.touches.length === 2 && touchDist) {
     const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    const scale = d / touchDist;
-    state.zoom = Math.max(0.2, Math.min(3, state.zoom * scale));
+    state.zoom = Math.max(0.2, Math.min(3, state.zoom * (d / touchDist)));
     touchDist = d;
     render();
   }
   e.preventDefault();
 }, {passive: false});
 
-canvas.addEventListener('touchend', () => {
-  isDragging = false;
-  dragTarget = null;
-  isPanning = false;
-  touchDist = null;
-});
+canvas.addEventListener('touchend', () => { isDragging = false; dragTarget = null; isPanning = false; touchDist = null; });
 
 function screenToSvg(sx, sy) {
   const rect = canvas.getBoundingClientRect();
-  return {
-    x: (sx - rect.left - state.panX) / state.zoom,
-    y: (sy - rect.top - state.panY) / state.zoom
-  };
+  return { x: (sx - rect.left - state.panX) / state.zoom, y: (sy - rect.top - state.panY) / state.zoom };
 }
 
 // Zoom
@@ -1000,42 +1180,30 @@ function zoomOut() { state.zoom = Math.max(0.2, state.zoom - 0.2); render(); }
 function resetView() { state.zoom = 1; state.panX = 0; state.panY = 0; render(); }
 
 // Sidebar
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
 
 // Auto-layout
 function autoLayout() {
   if (state.persons.length === 0) return;
-
   const generations = assignGenerations();
   const genGroups = {};
   for (const [pid, gen] of Object.entries(generations)) {
     if (!genGroups[gen]) genGroups[gen] = [];
     genGroups[gen].push(parseInt(pid));
   }
-
   const sortedGens = Object.keys(genGroups).map(Number).sort((a,b) => a - b);
   const canvasRect = document.getElementById('canvasWrap').getBoundingClientRect();
-  const startY = 100;
-  const gapY = 140;
-  const gapX = 160;
+  const gapY = 160, gapX = 160;
 
   for (let gi = 0; gi < sortedGens.length; gi++) {
-    const gen = sortedGens[gi];
-    const members = genGroups[gen];
+    const members = genGroups[sortedGens[gi]];
     const totalWidth = (members.length - 1) * gapX;
     const startX = (canvasRect.width / 2 - state.panX) / state.zoom - totalWidth / 2;
-
     for (let i = 0; i < members.length; i++) {
       const p = findPerson(members[i]);
-      if (p) {
-        p.x = startX + i * gapX;
-        p.y = startY + gi * gapY;
-      }
+      if (p) { p.x = startX + i * gapX; p.y = 100 + gi * gapY; }
     }
   }
-
   render();
   showToast('Diagrama organizado');
 }
@@ -1043,7 +1211,6 @@ function autoLayout() {
 function assignGenerations() {
   const gens = {};
   const parentOf = {};
-
   for (const cl of state.childLinks) {
     const union = state.unions.find(u => u.id === cl.unionId);
     if (union) {
@@ -1051,44 +1218,30 @@ function assignGenerations() {
       parentOf[cl.childId].push(union.person1Id, union.person2Id);
     }
   }
-
   function getGen(pid, visited) {
     if (gens[pid] !== undefined) return gens[pid];
     if (visited.has(pid)) return 0;
     visited.add(pid);
     const parents = parentOf[pid];
-    if (!parents || parents.length === 0) {
-      gens[pid] = 0;
-      return 0;
-    }
-    let maxParentGen = -1;
-    for (const par of parents) {
-      maxParentGen = Math.max(maxParentGen, getGen(par, visited));
-    }
-    gens[pid] = maxParentGen + 1;
+    if (!parents || parents.length === 0) { gens[pid] = 0; return 0; }
+    let mx = -1;
+    for (const par of parents) mx = Math.max(mx, getGen(par, visited));
+    gens[pid] = mx + 1;
     return gens[pid];
   }
-
-  for (const p of state.persons) {
-    getGen(p.id, new Set());
-  }
-
+  for (const p of state.persons) getGen(p.id, new Set());
   for (const u of state.unions) {
-    const g1 = gens[u.person1Id] || 0;
-    const g2 = gens[u.person2Id] || 0;
-    const mg = Math.min(g1, g2);
-    gens[u.person1Id] = mg;
-    gens[u.person2Id] = mg;
+    const mg = Math.min(gens[u.person1Id] || 0, gens[u.person2Id] || 0);
+    gens[u.person1Id] = mg; gens[u.person2Id] = mg;
   }
-
   return gens;
 }
 
-// Save/Load
+// Save/Load localStorage
 function saveToLocal() {
   const data = {persons: state.persons, unions: state.unions, childLinks: state.childLinks, nextId: state.nextId};
   localStorage.setItem('genograma_data', JSON.stringify(data));
-  showToast('Genograma guardado');
+  showToast('Genograma guardado en el navegador');
 }
 
 function loadFromLocal() {
@@ -1106,28 +1259,211 @@ function loadFromLocal() {
   } catch { showToast('Error al cargar datos'); }
 }
 
+// Export JSON
+function exportJSON() {
+  if (state.persons.length === 0) { showToast('No hay datos para exportar'); return; }
+  const data = {
+    version: '2.0',
+    exportDate: new Date().toISOString(),
+    persons: state.persons,
+    unions: state.unions,
+    childLinks: state.childLinks,
+    nextId: state.nextId
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.download = `genograma_${new Date().toISOString().slice(0,10)}.json`;
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('JSON exportado');
+}
+
+// Import JSON
+function handleImportJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.persons || !Array.isArray(data.persons)) throw new Error('Formato inválido');
+      state.persons = data.persons.map(p => ({...p, tags: p.tags || [], proband: !!p.proband}));
+      state.unions = data.unions || [];
+      state.childLinks = data.childLinks || [];
+      state.nextId = data.nextId || Math.max(...state.persons.map(p => p.id), ...state.unions.map(u => u.id), 0) + 1;
+      state.selectedId = null;
+      render();
+      showToast('JSON importado correctamente');
+    } catch (err) {
+      showToast('Error: archivo JSON inválido');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// Export CSV
+function exportCSV() {
+  if (state.persons.length === 0) { showToast('No hay datos para exportar'); return; }
+
+  const personHeaders = ['id','nombre','fecha_nacimiento','genero','vivo','fecha_fallecimiento','consultante','etiquetas','notas','pos_x','pos_y'];
+  let csv = '# PERSONAS\n' + personHeaders.join(',') + '\n';
+  for (const p of state.persons) {
+    csv += [
+      p.id,
+      csvField(p.name),
+      p.dob || '',
+      p.gender,
+      p.alive,
+      p.dod || '',
+      !!p.proband,
+      csvField((p.tags || []).join('|')),
+      csvField(p.notes || ''),
+      Math.round(p.x),
+      Math.round(p.y)
+    ].join(',') + '\n';
+  }
+
+  csv += '\n# RELACIONES\nid,persona1_id,persona2_id,tipo\n';
+  for (const u of state.unions) {
+    csv += [u.id, u.person1Id, u.person2Id, u.type].join(',') + '\n';
+  }
+
+  csv += '\n# HIJOS\nunion_id,hijo_id,tipo_filiacion\n';
+  for (const c of state.childLinks) {
+    csv += [c.unionId, c.childId, c.type].join(',') + '\n';
+  }
+
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.download = `genograma_${new Date().toISOString().slice(0,10)}.csv`;
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('CSV exportado');
+}
+
+function csvField(val) {
+  if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+    return '"' + val.replace(/"/g, '""') + '"';
+  }
+  return val;
+}
+
+// Import CSV
+function handleImportCSV(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const text = ev.target.result;
+      const sections = text.split(/\n# /);
+      let persons = [], unions = [], childLinks = [];
+
+      for (const sec of sections) {
+        const lines = sec.trim().split('\n').filter(l => l.trim() && !l.startsWith('#'));
+        if (lines.length < 2) continue;
+
+        const header = lines[0].toLowerCase();
+        if (header.includes('nombre') || header.includes('personas')) {
+          for (let i = 1; i < lines.length; i++) {
+            const cols = parseCSVLine(lines[i]);
+            if (cols.length < 5) continue;
+            persons.push({
+              id: parseInt(cols[0]),
+              name: cols[1],
+              dob: cols[2] || '',
+              gender: cols[3] || 'other',
+              alive: cols[4] === 'true',
+              dod: cols[5] || '',
+              proband: cols[6] === 'true',
+              tags: cols[7] ? cols[7].split('|').filter(t => t) : [],
+              notes: cols[8] || '',
+              x: parseFloat(cols[9]) || 200 + persons.length * 120,
+              y: parseFloat(cols[10]) || 200
+            });
+          }
+        } else if (header.includes('persona1') || header.includes('relaciones')) {
+          for (let i = 1; i < lines.length; i++) {
+            const cols = parseCSVLine(lines[i]);
+            if (cols.length < 4) continue;
+            unions.push({
+              id: parseInt(cols[0]),
+              person1Id: parseInt(cols[1]),
+              person2Id: parseInt(cols[2]),
+              type: cols[3]
+            });
+          }
+        } else if (header.includes('union_id') || header.includes('hijos')) {
+          for (let i = 1; i < lines.length; i++) {
+            const cols = parseCSVLine(lines[i]);
+            if (cols.length < 3) continue;
+            childLinks.push({
+              unionId: parseInt(cols[0]),
+              childId: parseInt(cols[1]),
+              type: cols[2]
+            });
+          }
+        }
+      }
+
+      if (persons.length === 0) throw new Error('No se encontraron personas');
+      state.persons = persons;
+      state.unions = unions;
+      state.childLinks = childLinks;
+      state.nextId = Math.max(...persons.map(p => p.id), ...unions.map(u => u.id), 0) + 1;
+      state.selectedId = null;
+      render();
+      showToast('CSV importado correctamente');
+    } catch (err) {
+      showToast('Error: archivo CSV inválido');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuotes) {
+      if (c === '"' && line[i+1] === '"') { current += '"'; i++; }
+      else if (c === '"') inQuotes = false;
+      else current += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { result.push(current); current = ''; }
+      else current += c;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
 // Export PNG
 function exportPNG() {
-  const svgEl = document.getElementById('canvas');
+  if (state.persons.length === 0) { showToast('No hay datos para exportar'); return; }
+  const svgElement = document.getElementById('canvas');
   const diagram = document.getElementById('diagram');
-
   const origTransform = diagram.getAttribute('transform');
   diagram.setAttribute('transform', 'translate(0,0) scale(1)');
-
   const bbox = diagram.getBBox();
-  const pad = 60;
+  const pad = 80;
   const w = bbox.width + pad * 2;
   const h = bbox.height + pad * 2;
 
-  const cloned = svgEl.cloneNode(true);
+  const cloned = svgElement.cloneNode(true);
   cloned.setAttribute('width', w);
   cloned.setAttribute('height', h);
   cloned.setAttribute('viewBox', `${bbox.x - pad} ${bbox.y - pad} ${w} ${h}`);
   const gridBg = cloned.querySelector('.grid-bg');
   if (gridBg) gridBg.setAttribute('fill', '#ffffff');
-
-  const clonedDiagram = cloned.querySelector('#diagram');
-  if (clonedDiagram) clonedDiagram.setAttribute('transform', 'translate(0,0) scale(1)');
+  const cd = cloned.querySelector('#diagram');
+  if (cd) cd.setAttribute('transform', 'translate(0,0) scale(1)');
 
   diagram.setAttribute('transform', origTransform);
 
@@ -1138,18 +1474,15 @@ function exportPNG() {
   const img = new Image();
   const blob = new Blob([svgStr], {type: 'image/svg+xml;charset=utf-8'});
   const url = URL.createObjectURL(blob);
-
   img.onload = () => {
     const scale = 2;
     const c = document.createElement('canvas');
-    c.width = w * scale;
-    c.height = h * scale;
+    c.width = w * scale; c.height = h * scale;
     const ctx = c.getContext('2d');
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, c.width, c.height);
     ctx.drawImage(img, 0, 0, c.width, c.height);
     URL.revokeObjectURL(url);
-
     const a = document.createElement('a');
     a.download = 'genograma.png';
     a.href = c.toDataURL('image/png');
@@ -1161,26 +1494,24 @@ function exportPNG() {
 
 // Export SVG
 function exportSVG() {
-  const svgEl = document.getElementById('canvas');
+  if (state.persons.length === 0) { showToast('No hay datos para exportar'); return; }
+  const svgElement = document.getElementById('canvas');
   const diagram = document.getElementById('diagram');
-
   const origTransform = diagram.getAttribute('transform');
   diagram.setAttribute('transform', 'translate(0,0) scale(1)');
-
   const bbox = diagram.getBBox();
-  const pad = 60;
+  const pad = 80;
   const w = bbox.width + pad * 2;
   const h = bbox.height + pad * 2;
 
-  const cloned = svgEl.cloneNode(true);
+  const cloned = svgElement.cloneNode(true);
   cloned.setAttribute('width', w);
   cloned.setAttribute('height', h);
   cloned.setAttribute('viewBox', `${bbox.x - pad} ${bbox.y - pad} ${w} ${h}`);
   const gridBg = cloned.querySelector('.grid-bg');
   if (gridBg) gridBg.setAttribute('fill', '#ffffff');
-
-  const clonedDiagram = cloned.querySelector('#diagram');
-  if (clonedDiagram) clonedDiagram.setAttribute('transform', 'translate(0,0) scale(1)');
+  const cd = cloned.querySelector('#diagram');
+  if (cd) cd.setAttribute('transform', 'translate(0,0) scale(1)');
 
   diagram.setAttribute('transform', origTransform);
 
@@ -1199,29 +1530,24 @@ function exportSVG() {
 
 // Print
 function printDiagram() {
+  if (state.persons.length === 0) { showToast('No hay datos para imprimir'); return; }
   const diagram = document.getElementById('diagram');
   const origTransform = diagram.getAttribute('transform');
-
   const bbox = diagram.getBBox();
   const pad = 40;
-  const svgEl = document.getElementById('canvas');
-  svgEl.setAttribute('viewBox', `${bbox.x - pad} ${bbox.y - pad} ${bbox.width + pad*2} ${bbox.height + pad*2}`);
+  const svgElement = document.getElementById('canvas');
+  svgElement.setAttribute('viewBox', `${bbox.x - pad} ${bbox.y - pad} ${bbox.width + pad*2} ${bbox.height + pad*2}`);
   diagram.setAttribute('transform', 'translate(0,0) scale(1)');
-
   window.print();
-
-  svgEl.removeAttribute('viewBox');
+  svgElement.removeAttribute('viewBox');
   diagram.setAttribute('transform', origTransform);
 }
 
 // Clear all
 function clearAll() {
   if (!confirm('¿Estás seguro de que deseas borrar todo el genograma?')) return;
-  state.persons = [];
-  state.unions = [];
-  state.childLinks = [];
-  state.selectedId = null;
-  state.nextId = 1;
+  state.persons = []; state.unions = []; state.childLinks = [];
+  state.selectedId = null; state.nextId = 1;
   render();
   showToast('Genograma limpiado');
 }
@@ -1238,9 +1564,7 @@ function showToast(msg) {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (state.mode !== 'select') cancelMode();
-    closePersonModal();
-    closeRelationModal();
-    closeChildModal();
+    closePersonModal(); closeRelationModal(); closeChildModal();
   }
   if (e.key === 'Delete' && state.selectedId && !document.querySelector('.modal-overlay.active')) {
     deletePerson(state.selectedId);
@@ -1249,13 +1573,12 @@ document.addEventListener('keydown', (e) => {
 
 // Init
 render();
-
 const saved = localStorage.getItem('genograma_data');
 if (saved) {
   try {
     const data = JSON.parse(saved);
     if (data.persons && data.persons.length > 0) {
-      state.persons = data.persons;
+      state.persons = data.persons.map(p => ({...p, tags: p.tags || [], proband: !!p.proband}));
       state.unions = data.unions || [];
       state.childLinks = data.childLinks || [];
       state.nextId = data.nextId || 1;
