@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GECASER NIST CSF v2.0 Briefing</title>
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GECASER · Instrumento MSPI Briefing</title>
 <style>
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
@@ -366,7 +366,7 @@
       <a href="#objetivo" data-i="1" class="active">01 Objetivo</a>
       <a href="#alcance" data-i="2" class="">02 Alcance</a>
       <a href="#cronograma" data-i="3" class="">03 Cronograma</a>
-      <a href="#portada-instrumento" data-i="4" class="">04 Evaluación por función</a>
+      <a href="#portada-instrumento" data-i="4" class="">04 Evaluación de controles</a>
       <a href="#controles" data-i="5" class="">05 Nivel de madurez</a>
       <a href="#confidencialidad" data-i="6" class="">06 Firma</a>
     </nav>
@@ -376,9 +376,9 @@
 <div class="container">
 
   <div class="cover">
-    <div class="eyebrow cover-eyebrow">EVALUACIÓN DE CIBERSEGURIDAD · NIST CSF v2.0 · REUNIÓN DE APERTURA</div>
+    <div class="eyebrow cover-eyebrow">AUDITORÍA DE CIBERSEGURIDAD · INSTRUMENTO MSPI DE MINTIC · REUNIÓN DE APERTURA</div>
     <h1>GECASER</h1>
-    <p class="subtitle">Evaluación del estado de madurez de la ciberseguridad frente al NIST Cybersecurity Framework v2.0 — sus seis funciones y categorías. Briefing ejecutivo previo al inicio de la evaluación.</p>
+    <p class="subtitle">Evaluación del diseño de los controles mediante el Instrumento MSPI de MinTIC, que integra sus dos marcos de referencia: los controles del Anexo A de ISO/IEC 27001:2022 y las funciones del NIST Cybersecurity Framework. Briefing ejecutivo previo al inicio de la evaluación.</p>
 
     <svg class="route" viewBox="0 0 732 30" preserveAspectRatio="none" aria-hidden="true">
       <path d="M0 15 C 120 15, 160 4, 240 15 S 400 26, 480 15 S 640 4, 732 15" fill="none" stroke="var(--rule)" stroke-width="1.5"></path>
@@ -399,7 +399,7 @@
       </div>
       <div class="meta-cell">
         <span class="meta-label">Marco</span>
-        <span class="meta-value mono">NIST CSF v2.0</span>
+        <span class="meta-value mono">Instrumento MSPI · ISO/IEC 27001:2022 + NIST CSF</span>
       </div>
       <div class="meta-cell">
         <span class="meta-label">Periodo</span>
@@ -413,11 +413,11 @@
     <section class="waypoint" id="objetivo">
       <div class="wp-number">01 / 06</div>
       <h2 class="wp-title">Objetivo</h2>
-      <p class="lede">Evaluar el <strong>estado de madurez</strong> de la ciberseguridad de GECASER frente al NIST Cybersecurity Framework v2.0, a través de sus seis funciones y 22 categorías.</p>
+      <p class="lede">Evaluar el <strong>diseño</strong> de los controles de ciberseguridad de GECASER mediante el Instrumento MSPI de MinTIC, que integra dos marcos de referencia: el Anexo A de ISO/IEC 27001:2022 y el NIST Cybersecurity Framework.</p>
       <ul class="plain">
-        <li>Determinar el nivel de madurez de cada función y categoría del marco frente al riesgo que debe mitigar.</li>
-        <li>Identificar brechas y oportunidades de mejora en el programa de ciberseguridad.</li>
-        <li>Calificar la madurez por función y categoría del NIST CSF v2.0 y contrastarla con un perfil objetivo.</li>
+        <li>Determinar si cada control está definido, documentado y formalizado de forma adecuada frente al riesgo que debe mitigar.</li>
+        <li>Identificar brechas de diseño (no conformidades) y oportunidades de mejora en el programa de ciberseguridad.</li>
+        <li>Diligenciar el instrumento MSPI con calificación de madurez por dominio del Anexo A y por función del NIST CSF.</li>
         <li>Entregar hallazgos priorizados y un plan de remediación.</li>
       </ul>
       <p style="margin-top:18px; font-size:0.88rem; color:var(--slate);">No incluye evaluación de efectividad operativa sostenida ni pruebas de intrusión — ver alcance.</p>
@@ -426,29 +426,29 @@
     <section class="waypoint" id="alcance">
       <div class="wp-number">02 / 06</div>
       <h2 class="wp-title">Alcance</h2>
-      <p class="lede">Organización completa de GECASER, evaluada contra las seis funciones del NIST CSF v2.0.</p>
+      <p class="lede">Organización completa de GECASER, evaluada con el Instrumento MSPI contra sus dos marcos de referencia: los dominios del Anexo A de ISO/IEC 27001:2022 y las funciones del NIST Cybersecurity Framework.</p>
 
       <table class="domain-table">
         <thead>
-          <tr><th>Función</th><th>Descripción</th><th class="num">Categorías</th></tr>
+          <tr><th>Anexo A · ISO/IEC 27001:2022</th><th>Descripción</th><th class="num">Controles</th></tr>
         </thead>
         <tbody>
-          <tr><td class="code">GV</td><td>Gobernar — gobierno y estrategia de ciberseguridad</td><td class="num">6</td></tr>
-          <tr><td class="code">ID</td><td>Identificar — activos y gestión de riesgos</td><td class="num">3</td></tr>
-          <tr><td class="code">PR</td><td>Proteger — salvaguardas y controles</td><td class="num">5</td></tr>
-          <tr><td class="code">DE</td><td>Detectar — monitoreo y detección</td><td class="num">2</td></tr>
-          <tr><td class="code">RS</td><td>Responder — gestión de incidentes</td><td class="num">4</td></tr>
-          <tr><td class="code">RC</td><td>Recuperar — recuperación y continuidad</td><td class="num">2</td></tr>
+          <tr><td class="code">A.5</td><td>Organizacionales</td><td class="num">37</td></tr>
+          <tr><td class="code">A.6</td><td>Personas</td><td class="num">8</td></tr>
+          <tr><td class="code">A.7</td><td>Físicos</td><td class="num">14</td></tr>
+          <tr><td class="code">A.8</td><td>Tecnológicos</td><td class="num">34</td></tr>
         </tbody>
         <tfoot>
-          <tr><td colspan="2">Total NIST CSF v2.0 (106 subcategorías)</td><td class="num">22</td></tr>
+          <tr><td colspan="2">Total Anexo A</td><td class="num">93</td></tr>
         </tfoot>
       </table>
+
+      <p style="margin-top:22px; font-size:0.88rem; color:var(--slate);">El instrumento MSPI mapea además cada control a las seis funciones del <strong>NIST Cybersecurity Framework</strong> — <span style="font-family:var(--font-mono); font-size:0.85em; color:var(--teal);">Gobernar · Identificar · Proteger · Detectar · Responder · Recuperar</span> — lo que permite leer los resultados bajo ambos marcos.</p>
 
       <div class="scope-flags">
         <div class="flag in">
           <h3>Dentro de alcance</h3>
-          <p>Gobierno, políticas, procesos, personas e infraestructura TI de GECASER. Evaluación de diseño y madurez de cada función y categoría del NIST CSF v2.0.</p>
+          <p>Gobierno, políticas, procesos, infraestructura TI, personal e instalaciones físicas de GECASER. Evaluación de diseño: existencia, adecuación y formalización de cada control.</p>
         </div>
         <div class="flag out">
           <h3>Fuera de alcance</h3>
@@ -483,7 +483,7 @@
             <li>Reunión de apertura (kickoff) y firma del acuerdo de confidencialidad.</li>
             <li>Entendimiento del contexto, los procesos y el programa de ciberseguridad de GECASER.</li>
             <li>Evaluación preliminar de riesgos y confirmación de objetivos y alcance.</li>
-            <li>Elaboración del plan y programa de trabajo (perfil y catálogo de subcategorías del NIST CSF v2.0).</li>
+            <li>Elaboración del plan y programa de trabajo (checklist del Instrumento MSPI: Anexo A y mapeo NIST CSF).</li>
           </ul>
           <p class="stage-deliver"><strong>Entregables:</strong> plan de auditoría, programa de trabajo y acuerdo de confidencialidad firmado.</p>
         </div>
@@ -498,11 +498,11 @@
           <h3 class="stage-title"><span class="stage-num">2</span>Ejecución <span class="iia-badge">IIA · Norma 2300</span></h3>
           <ul>
             <li>Recolección y análisis de evidencia: entrevistas y revisión documental.</li>
-            <li>Evaluación de la madurez de las 22 categorías y 106 subcategorías del NIST CSF v2.0 frente al riesgo que mitigan.</li>
-            <li>Calificación por función y categoría, contrastada con el perfil objetivo.</li>
-            <li>Identificación y documentación de hallazgos y brechas, con soporte probatorio.</li>
+            <li>Evaluación del diseño de los 93 controles del Anexo A frente al riesgo que mitigan.</li>
+            <li>Diligenciamiento del Instrumento MSPI, con calificación de madurez por dominio y por función del NIST CSF.</li>
+            <li>Identificación y documentación de hallazgos y no conformidades, con soporte probatorio.</li>
           </ul>
-          <p class="stage-deliver"><strong>Entregables:</strong> matriz de evaluación NIST CSF v2.0 diligenciada y papeles de trabajo con hallazgos soportados.</p>
+          <p class="stage-deliver"><strong>Entregables:</strong> instrumento MSPI diligenciado (Anexo A + NIST CSF) y papeles de trabajo con hallazgos soportados.</p>
         </div>
       </div>
 
@@ -528,11 +528,46 @@
 
     <section class="waypoint" id="portada-instrumento">
       <div class="wp-number">04 / 06</div>
-      <h2 class="wp-title">Evaluación por función</h2>
-      <p class="lede">Calificación de madurez de cada una de las seis funciones del NIST Cybersecurity Framework v2.0.</p>
-      <span class="doc-flag" style="margin-bottom:8px;">⚠ Ejemplo de presentación de resultados de la evaluación |— se reemplazan por los resultados reales de GECASER al cierre de la evaluación</span>
+      <h2 class="wp-title">Evaluación de controles</h2>
+      <p class="lede">Calificación de efectividad frente a los dos marcos del Instrumento MSPI: los controles del Anexo A de ISO/IEC 27001:2022 y las funciones del NIST Cybersecurity Framework.</p>
+      <span class="doc-flag" style="margin-bottom:8px;">⚠ Ejemplo de presentación de resultados de la auditoría |— se reemplazan por los resultados reales de GECASER al cierre de la evaluación</span>
 
-      <h3 class="score-block-title">Madurez por función — NIST CSF v2.0</h3>
+      <h3 class="score-block-title">Evaluación de efectividad de controles — ISO/IEC 27001:2022 Anexo A</h3>
+      <div class="score-block">
+        <div class="score-row">
+          <div class="score-label"><span class="code">A.5</span>Organizacionales</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-good" style="width:95%"></div></div>
+          <div class="score-value">95</div>
+          <div class="score-tag">Optimizado</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label"><span class="code">A.6</span>Personas</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-medium" style="width:40%"></div></div>
+          <div class="score-value">40</div>
+          <div class="score-tag">Repetible</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label"><span class="code">A.7</span>Físicos</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-good" style="width:93%"></div></div>
+          <div class="score-value">93</div>
+          <div class="score-tag">Optimizado</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label"><span class="code">A.8</span>Tecnológicos</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-poor" style="width:2%"></div></div>
+          <div class="score-value">0</div>
+          <div class="score-tag">Inexistente</div>
+        </div>
+        <div class="score-row score-total">
+          <div class="score-label">Promedio evaluación de controles</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-medium" style="width:57%"></div></div>
+          <div class="score-value">57</div>
+          <div class="score-tag">Efectivo</div>
+        </div>
+      </div>
+      <p class="score-caption">Escala 0–100 · calificación objetivo: 100 (Optimizado).</p>
+
+      <h3 class="score-block-title" style="margin-top:38px;">Calificación frente al NIST Cybersecurity Framework</h3>
       <div class="score-block">
         <div class="score-row">
           <div class="score-label"><span class="code">GV</span>Gobernar</div>
@@ -577,13 +612,13 @@
           <div class="score-tag">Efectivo</div>
         </div>
       </div>
-      <p class="score-caption">Escala 0–100 · nivel objetivo: 100 en cada función.</p>
+      <p class="score-caption">Escala 0–100 · nivel ideal CSF: 100 en cada función.</p>
     </section>
 
     <section class="waypoint" id="controles">
       <div class="wp-number">05 / 06</div>
       <h2 class="wp-title">Nivel de madurez</h2>
-      <p class="lede">Cada función y categoría del NIST CSF v2.0 se califica según la escala de madurez de diseño aplicada en la evaluación.</p>
+      <p class="lede">Cada control se califica según la escala de madurez de diseño del Instrumento MSPI de MinTIC.</p>
 
       <div class="maturity">
         <div class="maturity-row">
@@ -615,8 +650,8 @@
           <div class="maturity-bar-track"><div class="maturity-bar-fill" style="width:100%"></div></div>
         </div>
       </div>
-      <p style="margin-top:24px; font-size:0.88rem; color:var(--slate);">La madurez se interpreta además frente a los niveles de implementación (<em>Tiers</em>) del <strong>NIST CSF v2.0</strong>: Parcial (1), Informado por el riesgo (2), Repetible (3) y Adaptativo (4).</p>
-      <p style="font-size:0.88rem; color:var(--slate);">Registro detallado por subcategoría: <code style="font-family:var(--font-mono); font-size:0.85em;">matriz de evaluación NIST CSF v2.0</code>.</p>
+      <p style="margin-top:24px; font-size:0.88rem; color:var(--slate);">El instrumento mapea además cada control a las funciones del <strong>NIST Cybersecurity Framework</strong> (hoja NIST), lo que permite leer los resultados bajo los dos marcos del MSPI.</p>
+      <p style="font-size:0.88rem; color:var(--slate);">Registro detallado por control: <code style="font-family:var(--font-mono); font-size:0.85em;">01_Planificacion/articles-401779_recurso_1.xlsx</code> y <code style="font-family:var(--font-mono); font-size:0.85em;">03_Checklist_ISO27001/</code>.</p>
     </section>
 
     <section class="waypoint" id="confidencialidad">
@@ -627,7 +662,7 @@
       <div class="docwrap">
         <span class="doc-flag">⏱ Requerido antes del inicio de la ejecución — 19-oct-2026</span>
         <div class="doc-title">Acuerdo de Confidencialidad</div>
-        <div class="doc-parties">Entre <strong>pathAI Partner</strong> (auditor) y <strong>GECASER</strong> (cliente), en el marco de la evaluación de ciberseguridad bajo NIST CSF v2.0.</div>
+        <div class="doc-parties">Entre <strong>pathAI Partner</strong> (auditor) y <strong>GECASER</strong> (cliente), en el marco de la auditoría de ciberseguridad con el Instrumento MSPI de MinTIC (ISO/IEC 27001:2022 y NIST CSF).</div>
 
         <ol class="clauses">
           <li><p><strong>Objeto.</strong> Este acuerdo regula el tratamiento de la información confidencial a la que pathAI Partner tendrá acceso durante la auditoría.</p></li>
@@ -670,7 +705,7 @@
       </svg>
       <span>pathaipartner.com</span>
     </span>
-    <p>Documento de uso interno para GECASER — evaluación de ciberseguridad NIST CSF v2.0.</p>
+    <p>Documento de uso interno para GECASER — auditoría de ciberseguridad con el Instrumento MSPI de MinTIC.</p>
   </footer>
 </div>
 
