@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GECASER 27001 Briefing</title>
+<style>
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+  }
+
+  :root {
+    --ink: #101820;
+    --paper: #F2F4F3;
+    --surface: #FFFFFF;
+    --teal: #0D5C56;
+    --teal-soft: #DCEAE8;
+    --amber: #B4592A;
+    --amber-soft: #F3E1D5;
+    --slate: #55636B;
+    --slate-dim: #8996A0;
+    --rule: #D7DCDB;
+    --sev-high: #A6402A;
+    --sev-high-soft: #F1DCD6;
+    --sev-med: #A87A1E;
+    --sev-med-soft: #F1E6D0;
+    --sev-low: #3E7A6B;
+    --sev-low-soft: #DCEAE5;
+    --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #E8ECEB;
+      --paper: #0B1417;
+      --surface: #101B1E;
+      --teal: #4FBDB3;
+      --teal-soft: #12302C;
+      --amber: #E08A4C;
+      --amber-soft: #33231A;
+      --slate: #9AA7AC;
+      --slate-dim: #66757B;
+      --rule: #24302F;
+      --sev-high: #E2795D;
+      --sev-high-soft: #3A211C;
+      --sev-med: #D9A94A;
+      --sev-med-soft: #382D18;
+      --sev-low: #6FC0AE;
+      --sev-low-soft: #163430;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #E8ECEB;
+    --paper: #0B1417;
+    --surface: #101B1E;
+    --teal: #4FBDB3;
+    --teal-soft: #12302C;
+    --amber: #E08A4C;
+    --amber-soft: #33231A;
+    --slate: #9AA7AC;
+    --slate-dim: #66757B;
+    --rule: #24302F;
+    --sev-high: #E2795D;
+    --sev-high-soft: #3A211C;
+    --sev-med: #D9A94A;
+    --sev-med-soft: #382D18;
+    --sev-low: #6FC0AE;
+    --sev-low-soft: #163430;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    margin: 0;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+  p { margin: 0 0 1em; max-width: 62ch; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--teal);
+    font-weight: 500;
+  }
+  .container { max-width: 780px; margin: 0 auto; padding: 0 28px; }
+  a { color: var(--teal); }
+
+  /* ---------- brandmark ---------- */
+  .brandmark { display: inline-flex; align-items: center; gap: 8px; }
+  .brandmark svg { width: 20px; height: 20px; flex: none; }
+  .brandmark span {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    color: var(--slate);
+  }
+  .brandmark b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .topbar-inner {
+    max-width: 780px; margin: 0 auto; padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .waynav { display: flex; gap: 4px; flex-wrap: wrap; }
+  .waynav a {
+    font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.03em;
+    text-decoration: none; color: var(--slate-dim);
+    padding: 5px 9px; border-radius: 20px; border: 1px solid transparent;
+    transition: color .15s ease, border-color .15s ease;
+  }
+  .waynav a:hover { color: var(--teal); }
+  .waynav a.active { color: var(--teal); border-color: var(--teal-soft); background: var(--teal-soft); }
+
+  /* ---------- cover ---------- */
+  .cover { padding: 64px 0 52px; }
+  .cover-eyebrow { margin-bottom: 22px; }
+  .cover h1 {
+    font-size: clamp(2.6rem, 6vw, 3.6rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .cover .subtitle {
+    font-size: 1.12rem;
+    color: var(--slate);
+    max-width: 46ch;
+    margin-top: 14px;
+  }
+  .route {
+    margin: 34px 0 0;
+    width: 100%; height: 30px;
+  }
+  .meta-grid {
+    margin-top: 38px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .meta-cell { padding: 16px 18px 16px 0; border-left: 1px solid var(--rule); }
+  .meta-cell:first-child { border-left: none; padding-left: 0; }
+  .meta-label {
+    font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--slate-dim); display: block; margin-bottom: 6px;
+  }
+  .meta-value { font-size: 0.95rem; font-weight: 500; }
+  .meta-value.mono { font-family: var(--font-mono); font-size: 0.82rem; }
+
+  /* ---------- path rail + waypoints ---------- */
+  .path {
+    position: relative;
+    padding-left: 44px;
+  }
+  .path::before {
+    content: "";
+    position: absolute; left: 9px; top: 6px; bottom: 6px;
+    width: 1px;
+    background: var(--rule);
+  }
+  section.waypoint { position: relative; padding: 56px 0 58px; scroll-margin-top: 64px; }
+  section.waypoint:last-of-type { padding-bottom: 8px; }
+  .waypoint::before {
+    content: "";
+    position: absolute; left: -44px; top: 60px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--paper);
+    border: 1.5px solid var(--teal);
+  }
+  .wp-number {
+    font-family: var(--font-mono); font-size: 0.72rem; color: var(--slate-dim);
+    letter-spacing: 0.06em;
+  }
+  .wp-title { font-size: 1.7rem; font-weight: 600; margin: 6px 0 20px; }
+  .lede { font-size: 1.05rem; color: var(--ink); }
+
+  ul.plain { list-style: none; margin: 18px 0; padding: 0; display: grid; gap: 10px; }
+  ul.plain li { padding-left: 20px; position: relative; max-width: 62ch; }
+  ul.plain li::before {
+    content: "—"; position: absolute; left: 0; color: var(--teal); font-family: var(--font-mono);
+  }
+
+  /* ---------- domain table (alcance / controles) ---------- */
+  .domain-table { width: 100%; border-collapse: collapse; margin-top: 22px; font-size: 0.92rem; }
+  .domain-table caption { text-align: left; }
+  .domain-table th, .domain-table td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--rule); }
+  .domain-table thead th {
+    font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--slate-dim); font-weight: 500; border-bottom: 1px solid var(--ink);
+  }
+  .domain-table td.code { font-family: var(--font-mono); color: var(--teal); font-weight: 500; }
+  .domain-table td.num, .domain-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .domain-table tfoot td { font-weight: 600; border-bottom: none; border-top: 1px solid var(--ink); }
+
+  .scope-flags { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 26px; }
+  .flag { padding: 16px 18px; border-radius: 3px; }
+  .flag.in { background: var(--teal-soft); }
+  .flag.out { background: color-mix(in srgb, var(--slate) 12%, transparent); }
+  .flag h3 { font-size: 0.92rem; font-family: var(--font-body); font-weight: 600; margin-bottom: 8px; }
+  .flag p { font-size: 0.88rem; color: var(--slate); margin: 0; max-width: none; }
+
+  /* ---------- cronograma / timeline ---------- */
+  .phase-bar { display: flex; gap: 6px; margin: 26px 0 6px; }
+  .phase-seg {
+    height: 42px; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 0 8px;
+  }
+  .phase-seg span {
+    font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.04em;
+    text-transform: uppercase; font-weight: 600; line-height: 1.2;
+  }
+  .phase-seg.p1 { background: var(--teal-soft); color: var(--teal); }
+  .phase-seg.p2 { background: var(--amber-soft); color: var(--amber); }
+  .phase-seg.p3 { background: var(--sev-low-soft); color: var(--sev-low); }
+  .phase-axis {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 0.66rem; color: var(--slate-dim); margin-bottom: 8px;
+  }
+
+  .stage {
+    display: grid; grid-template-columns: 136px 1fr; gap: 20px;
+    padding: 22px 0; border-top: 1px solid var(--rule);
+  }
+  .stage:first-of-type { border-top: 1px solid var(--ink); }
+  .stage-dates { font-family: var(--font-mono); font-size: 0.84rem; font-weight: 600; color: var(--ink); }
+  .stage-dur { font-family: var(--font-mono); font-size: 0.68rem; color: var(--slate-dim); margin-top: 5px; display: block; }
+  .stage-title {
+    font-size: 1.12rem; font-weight: 600; font-family: var(--font-body); margin: 0 0 6px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .stage-num {
+    display: inline-flex; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--teal); color: var(--surface);
+    font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600;
+    align-items: center; justify-content: center; flex: none;
+  }
+  .iia-badge {
+    font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--teal); background: var(--teal-soft); padding: 3px 8px; border-radius: 3px; font-weight: 500;
+  }
+  .stage ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 7px; }
+  .stage ul li { padding-left: 18px; position: relative; font-size: 0.9rem; color: var(--slate); max-width: 60ch; }
+  .stage ul li::before { content: "—"; position: absolute; left: 0; color: var(--teal); font-family: var(--font-mono); }
+  .stage-deliver { font-size: 0.82rem; color: var(--slate-dim); margin: 10px 0 0; }
+  .stage-deliver strong { color: var(--slate); font-weight: 600; }
+
+  /* ---------- score blocks (portada del instrumento) ---------- */
+  .score-block-title { font-size: 1.02rem; font-weight: 600; margin: 0 0 16px; font-family: var(--font-body); }
+  .score-block { display: flex; flex-direction: column; }
+  .score-row {
+    display: grid; grid-template-columns: 190px 1fr 40px 100px; align-items: center; gap: 14px;
+    padding: 9px 0; border-bottom: 1px solid var(--rule);
+  }
+  .score-row:first-child { border-top: 1px solid var(--rule); }
+  .score-label { font-size: 0.88rem; }
+  .score-label .code { font-family: var(--font-mono); font-size: 0.78rem; color: var(--teal); margin-right: 8px; }
+  .score-bar-track { height: 8px; background: var(--rule); border-radius: 5px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 5px; }
+  .score-bar-fill.tier-good { background: var(--sev-low); }
+  .score-bar-fill.tier-medium { background: var(--sev-med); }
+  .score-bar-fill.tier-poor { background: var(--sev-high); }
+  .score-value { font-family: var(--font-mono); font-size: 0.85rem; text-align: right; font-variant-numeric: tabular-nums; }
+  .score-tag {
+    font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--slate); text-align: right;
+  }
+  .score-row.score-total { font-weight: 600; border-top: 1px solid var(--ink); margin-top: 4px; }
+  .score-caption { font-size: 0.8rem; color: var(--slate-dim); margin: 10px 0 0; }
+
+  @media (max-width: 640px) {
+    .score-row { grid-template-columns: 1fr; gap: 4px; padding: 12px 0; }
+    .score-value, .score-tag { text-align: left; }
+  }
+
+  /* ---------- maturity scale ---------- */
+  .maturity { margin-top: 30px; }
+  .maturity-row { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; padding: 7px 0; }
+  .maturity-bar-track { height: 6px; background: var(--rule); border-radius: 4px; overflow: hidden; }
+  .maturity-bar-fill { height: 100%; background: var(--teal); border-radius: 4px; }
+  .maturity-label { font-size: 0.84rem; font-family: var(--font-mono); color: var(--slate); display: flex; justify-content: space-between; }
+
+  /* ---------- confidentiality document ---------- */
+  .docwrap {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 40px clamp(22px, 5vw, 52px);
+    margin-top: 6px;
+  }
+  .doc-flag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.04em;
+    color: var(--amber); background: var(--amber-soft);
+    padding: 7px 12px; border-radius: 3px; margin-bottom: 26px;
+  }
+  .doc-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; }
+  .doc-parties { color: var(--slate); font-size: 0.92rem; margin-bottom: 30px; }
+  ol.clauses { list-style: none; counter-reset: clause; margin: 0; padding: 0; }
+  ol.clauses li {
+    counter-increment: clause;
+    display: grid; grid-template-columns: 30px 1fr; gap: 10px;
+    padding: 15px 0; border-top: 1px solid var(--rule);
+  }
+  ol.clauses li:first-child { border-top: none; }
+  ol.clauses li::before {
+    content: counter(clause, decimal-leading-zero);
+    font-family: var(--font-mono); font-size: 0.8rem; color: var(--slate-dim); padding-top: 2px;
+  }
+  ol.clauses strong { font-weight: 600; }
+  ol.clauses p { margin: 0; font-size: 0.92rem; max-width: none; }
+
+  .signblock { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .sign-party .eyebrow { display: block; margin-bottom: 16px; }
+  .sign-field { margin-bottom: 20px; }
+  .sign-field label {
+    display: block; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--slate-dim); margin-bottom: 8px;
+  }
+  .sign-line { border-bottom: 1px solid var(--ink); height: 22px; }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 30px 0 60px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  footer p { margin: 0; font-size: 0.78rem; color: var(--slate-dim); max-width: none; }
+
+  @media (max-width: 640px) {
+    .container { padding: 0 18px; }
+    .path { padding-left: 26px; }
+    .path::before { left: 5px; }
+    .waypoint::before { left: -26px; }
+    .meta-grid { grid-template-columns: 1fr 1fr; }
+    .meta-cell:nth-child(3) { border-left: none; padding-left: 0; }
+    .scope-flags { grid-template-columns: 1fr; }
+    .signblock { grid-template-columns: 1fr; }
+    .waynav { display: none; }
+    .risk-row { grid-template-columns: 70px 1fr; }
+    .stage { grid-template-columns: 1fr; gap: 10px; }
+  }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+</head><body><div class="topbar">
+  <div class="topbar-inner">
+    <span class="brandmark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="1.3" style="color:var(--teal)"></circle>
+        <path d="M8 15.5L15.5 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="color:var(--teal)"></path>
+        <circle cx="15.5" cy="8" r="1.4" fill="currentColor" style="color:var(--amber)"></circle>
+      </svg>
+      <span><b>pathAI</b> Partner</span>
+    </span>
+    <nav class="waynav" id="waynav">
+      <a href="#objetivo" data-i="1" class="active">01 Objetivo</a>
+      <a href="#alcance" data-i="2" class="">02 Alcance</a>
+      <a href="#cronograma" data-i="3" class="">03 Cronograma</a>
+      <a href="#portada-instrumento" data-i="4" class="">04 Evaluación de controles</a>
+      <a href="#controles" data-i="5" class="">05 Nivel de madurez</a>
+      <a href="#confidencialidad" data-i="6" class="">06 Firma</a>
+    </nav>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="cover">
+    <div class="eyebrow cover-eyebrow">AUDITORÍA DE CUMPLIMIENTO · ISO/IEC 27001:2022 · REUNIÓN DE APERTURA</div>
+    <h1>GECASER</h1>
+    <p class="subtitle">Evaluación del diseño de los controles del Anexo A, mediante el Instrumento MSPI de MinTIC — alineado además con el NIST Cybersecurity Framework. Briefing ejecutivo previo al inicio de pruebas.</p>
+
+    <svg class="route" viewBox="0 0 732 30" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 15 C 120 15, 160 4, 240 15 S 400 26, 480 15 S 640 4, 732 15" fill="none" stroke="var(--rule)" stroke-width="1.5"></path>
+      <circle cx="0" cy="15" r="3.5" fill="var(--teal)"></circle>
+      <circle cx="240" cy="15" r="3.5" fill="var(--teal)"></circle>
+      <circle cx="480" cy="15" r="3.5" fill="var(--teal)"></circle>
+      <circle cx="732" cy="15" r="3.5" fill="var(--amber)"></circle>
+    </svg>
+
+    <div class="meta-grid">
+      <div class="meta-cell">
+        <span class="meta-label">Cliente</span>
+        <span class="meta-value">GECASER</span>
+      </div>
+      <div class="meta-cell">
+        <span class="meta-label">Auditor</span>
+        <span class="meta-value">pathAI Partner</span>
+      </div>
+      <div class="meta-cell">
+        <span class="meta-label">Marco</span>
+        <span class="meta-value mono">ISO/IEC 27001:2022 · MSPI MinTIC · NIST CSF</span>
+      </div>
+      <div class="meta-cell">
+        <span class="meta-label">Periodo</span>
+        <span class="meta-value mono">02-oct → 30-nov-2026</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="path">
+
+    <section class="waypoint" id="objetivo">
+      <div class="wp-number">01 / 06</div>
+      <h2 class="wp-title">Objetivo</h2>
+      <p class="lede">Evaluar el <strong>diseño</strong> de los 93 controles del Anexo A de ISO/IEC 27001:2022 en GECASER, usando el Instrumento MSPI de MinTIC como base metodológica y de registro.</p>
+      <ul class="plain">
+        <li>Determinar si cada control está definido, documentado y formalizado de forma adecuada frente al riesgo que debe mitigar.</li>
+        <li>Identificar brechas de diseño (no conformidades) y oportunidades de mejora sobre el SGSI.</li>
+        <li>Diligenciar el instrumento MSPI por dominio, con calificación de madurez de diseño.</li>
+        <li>Entregar hallazgos priorizados y un plan de remediación.</li>
+      </ul>
+      <p style="margin-top:18px; font-size:0.88rem; color:var(--slate);">No incluye evaluación de efectividad operativa sostenida ni pruebas de intrusión — ver alcance.</p>
+    </section>
+
+    <section class="waypoint" id="alcance">
+      <div class="wp-number">02 / 06</div>
+      <h2 class="wp-title">Alcance</h2>
+      <p class="lede">Organización completa de GECASER, evaluada contra los cuatro dominios del Anexo A.</p>
+
+      <table class="domain-table">
+        <thead>
+          <tr><th>Dominio</th><th>Descripción</th><th class="num">Controles</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="code">A.5</td><td>Organizacionales</td><td class="num">37</td></tr>
+          <tr><td class="code">A.6</td><td>Personas</td><td class="num">8</td></tr>
+          <tr><td class="code">A.7</td><td>Físicos</td><td class="num">14</td></tr>
+          <tr><td class="code">A.8</td><td>Tecnológicos</td><td class="num">34</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="2">Total Anexo A</td><td class="num">93</td></tr>
+        </tfoot>
+      </table>
+
+      <div class="scope-flags">
+        <div class="flag in">
+          <h3>Dentro de alcance</h3>
+          <p>Políticas, procesos, infraestructura TI, personal e instalaciones físicas de GECASER. Evaluación de diseño: existencia, adecuación y formalización de cada control.</p>
+        </div>
+        <div class="flag out">
+          <h3>Fuera de alcance</h3>
+          <p>Efectividad operativa sostenida en el tiempo. Pruebas técnicas de intrusión (pentesting). Exclusiones adicionales a definir con GECASER.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="waypoint" id="cronograma">
+      <div class="wp-number">03 / 06</div>
+      <h2 class="wp-title">Cronograma</h2>
+      <p class="lede">La auditoría se ejecuta entre el <strong>2 de octubre</strong> y el <strong>30 de noviembre de 2026</strong>, en tres etapas alineadas con las mejores prácticas del IIA (Normas Internacionales para el Ejercicio Profesional de la Auditoría Interna): planeación, ejecución y resultados.</p>
+
+      <div class="phase-bar" aria-hidden="true">
+        <div class="phase-seg p1" style="flex:16"><span>Planeación</span></div>
+        <div class="phase-seg p2" style="flex:26"><span>Ejecución</span></div>
+        <div class="phase-seg p3" style="flex:14"><span>Resultados</span></div>
+      </div>
+      <div class="phase-axis">
+        <span>2 oct</span>
+        <span>30 nov 2026</span>
+      </div>
+
+      <div class="stage">
+        <div class="stage-when">
+          <div class="stage-dates">02 → 17 oct</div>
+          <span class="stage-dur">2026 · ~2 semanas</span>
+        </div>
+        <div class="stage-body">
+          <h3 class="stage-title"><span class="stage-num">1</span>Planeación <span class="iia-badge">IIA · Norma 2200</span></h3>
+          <ul>
+            <li>Reunión de apertura (kickoff) y firma del acuerdo de confidencialidad.</li>
+            <li>Entendimiento del contexto, los procesos y el SGSI de GECASER.</li>
+            <li>Evaluación preliminar de riesgos y confirmación de objetivos y alcance.</li>
+            <li>Elaboración del plan y programa de trabajo (checklist Anexo A / Instrumento MSPI).</li>
+          </ul>
+          <p class="stage-deliver"><strong>Entregables:</strong> plan de auditoría, programa de trabajo y acuerdo de confidencialidad firmado.</p>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-when">
+          <div class="stage-dates">20 oct → 14 nov</div>
+          <span class="stage-dur">2026 · ~4 semanas</span>
+        </div>
+        <div class="stage-body">
+          <h3 class="stage-title"><span class="stage-num">2</span>Ejecución <span class="iia-badge">IIA · Norma 2300</span></h3>
+          <ul>
+            <li>Recolección y análisis de evidencia: entrevistas, documentación y revisión de configuraciones.</li>
+            <li>Evaluación del diseño de los 93 controles del Anexo A frente al riesgo que mitigan.</li>
+            <li>Diligenciamiento del Instrumento MSPI por dominio, con calificación de madurez.</li>
+            <li>Identificación y documentación de hallazgos y no conformidades, con soporte probatorio.</li>
+          </ul>
+          <p class="stage-deliver"><strong>Entregables:</strong> instrumento MSPI diligenciado y papeles de trabajo con hallazgos soportados.</p>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-when">
+          <div class="stage-dates">17 → 30 nov</div>
+          <span class="stage-dur">2026 · ~2 semanas</span>
+        </div>
+        <div class="stage-body">
+          <h3 class="stage-title"><span class="stage-num">3</span>Resultados <span class="iia-badge">IIA · Normas 2400 / 2500</span></h3>
+          <ul>
+            <li>Validación de hallazgos con GECASER y priorización por nivel de riesgo.</li>
+            <li>Informe preliminar y reunión de cierre con la dirección.</li>
+            <li>Entrega del informe final con conclusiones y plan de remediación.</li>
+            <li>Definición del esquema de seguimiento a las acciones correctivas.</li>
+          </ul>
+          <p class="stage-deliver"><strong>Entregables:</strong> informe final, plan de remediación priorizado y acta de cierre.</p>
+        </div>
+      </div>
+
+      <p style="margin-top:22px; font-size:0.84rem; color:var(--slate-dim);">Las fechas pueden ajustarse de común acuerdo según la disponibilidad de interlocutores y evidencia de GECASER, conservando los hitos y el marco metodológico del IIA.</p>
+    </section>
+
+    <section class="waypoint" id="portada-instrumento">
+      <div class="wp-number">04 / 06</div>
+      <h2 class="wp-title">Evaluación de controles</h2>
+      <p class="lede">Calificación de efectividad de controles Anexo A e ISO/IEC 27001:2022, y calificación frente al NIST Cybersecurity Framework.</p>
+      <span class="doc-flag" style="margin-bottom:8px;">⚠ Ejemplo de presentación de resultados de la auditoría |— se reemplazan por los resultados reales de GECASER al cierre de la evaluación</span>
+
+      <h3 class="score-block-title">Evaluación de efectividad de controles — ISO/IEC 27001:2022 Anexo A</h3>
+      <div class="score-block">
+        <div class="score-row">
+          <div class="score-label"><span class="code">A.5</span>Organizacionales</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-good" style="width:95%"></div></div>
+          <div class="score-value">95</div>
+          <div class="score-tag">Optimizado</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label"><span class="code">A.6</span>Personas</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-medium" style="width:40%"></div></div>
+          <div class="score-value">40</div>
+          <div class="score-tag">Repetible</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label"><span class="code">A.7</span>Físicos</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-good" style="width:93%"></div></div>
+          <div class="score-value">93</div>
+          <div class="score-tag">Optimizado</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label"><span class="code">A.8</span>Tecnológicos</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-poor" style="width:2%"></div></div>
+          <div class="score-value">0</div>
+          <div class="score-tag">Inexistente</div>
+        </div>
+        <div class="score-row score-total">
+          <div class="score-label">Promedio evaluación de controles</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-medium" style="width:57%"></div></div>
+          <div class="score-value">57</div>
+          <div class="score-tag">Efectivo</div>
+        </div>
+      </div>
+      <p class="score-caption">Escala 0–100 · calificación objetivo: 100 (Optimizado).</p>
+
+      <h3 class="score-block-title" style="margin-top:38px;">Calificación frente al NIST Cybersecurity Framework</h3>
+      <div class="score-block">
+        <div class="score-row">
+          <div class="score-label">Gobernar</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-medium" style="width:42%"></div></div>
+          <div class="score-value">42</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Identificar</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-medium" style="width:59%"></div></div>
+          <div class="score-value">59</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Proteger</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-poor" style="width:22%"></div></div>
+          <div class="score-value">22</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Detectar</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-medium" style="width:50%"></div></div>
+          <div class="score-value">50</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Responder</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-good" style="width:100%"></div></div>
+          <div class="score-value">100</div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Recuperar</div>
+          <div class="score-bar-track"><div class="score-bar-fill tier-good" style="width:85%"></div></div>
+          <div class="score-value">85</div>
+        </div>
+      </div>
+      <p class="score-caption">Escala 0–100 · nivel ideal CSF: 100 en cada función.</p>
+    </section>
+
+    <section class="waypoint" id="controles">
+      <div class="wp-number">05 / 06</div>
+      <h2 class="wp-title">Nivel de madurez</h2>
+      <p class="lede">Cada control se califica según la escala de madurez de diseño del Instrumento MSPI de MinTIC.</p>
+
+      <div class="maturity">
+        <div class="maturity-row">
+          <div class="maturity-label"><span>N/A</span></div>
+          <div style="font-size:0.82rem; color:var(--slate);">No aplica al contexto de GECASER</div>
+        </div>
+        <div class="maturity-row">
+          <div class="maturity-label"><span>Inexistente</span><span>0</span></div>
+          <div class="maturity-bar-track"><div class="maturity-bar-fill" style="width:2%"></div></div>
+        </div>
+        <div class="maturity-row">
+          <div class="maturity-label"><span>Inicial</span><span>20</span></div>
+          <div class="maturity-bar-track"><div class="maturity-bar-fill" style="width:20%"></div></div>
+        </div>
+        <div class="maturity-row">
+          <div class="maturity-label"><span>Repetible</span><span>40</span></div>
+          <div class="maturity-bar-track"><div class="maturity-bar-fill" style="width:40%"></div></div>
+        </div>
+        <div class="maturity-row">
+          <div class="maturity-label"><span>Efectivo</span><span>60</span></div>
+          <div class="maturity-bar-track"><div class="maturity-bar-fill" style="width:60%"></div></div>
+        </div>
+        <div class="maturity-row">
+          <div class="maturity-label"><span>Gestionado</span><span>80</span></div>
+          <div class="maturity-bar-track"><div class="maturity-bar-fill" style="width:80%"></div></div>
+        </div>
+        <div class="maturity-row">
+          <div class="maturity-label"><span>Optimizado</span><span>100</span></div>
+          <div class="maturity-bar-track"><div class="maturity-bar-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+      <p style="margin-top:24px; font-size:0.88rem; color:var(--slate);">El instrumento incluye además un mapeo complementario de cada control a las funciones del <strong>NIST Cybersecurity Framework</strong> (hoja NIST), lo que permite leer los resultados también bajo esa referencia.</p>
+      <p style="font-size:0.88rem; color:var(--slate);">Registro detallado por control: <code style="font-family:var(--font-mono); font-size:0.85em;">01_Planificacion/articles-401779_recurso_1.xlsx</code> y <code style="font-family:var(--font-mono); font-size:0.85em;">03_Checklist_ISO27001/</code>.</p>
+    </section>
+
+    <section class="waypoint" id="confidencialidad">
+      <div class="wp-number">06 / 06</div>
+      <h2 class="wp-title">Confidencialidad</h2>
+      <p class="lede">Formato a firmar por ambas partes antes del inicio de las pruebas de auditoría.</p>
+
+      <div class="docwrap">
+        <span class="doc-flag">⏱ Requerido antes del inicio de la ejecución — 19-oct-2026</span>
+        <div class="doc-title">Acuerdo de Confidencialidad</div>
+        <div class="doc-parties">Entre <strong>pathAI Partner</strong> (auditor) y <strong>GECASER</strong> (cliente), en el marco de la auditoría de cumplimiento ISO/IEC 27001:2022.</div>
+
+        <ol class="clauses">
+          <li><p><strong>Objeto.</strong> Este acuerdo regula el tratamiento de la información confidencial a la que pathAI Partner tendrá acceso durante la auditoría.</p></li>
+          <li><p><strong>Información confidencial.</strong> Comprende políticas, procedimientos, configuraciones técnicas, datos personales, hallazgos y vulnerabilidades identificadas durante el ejercicio.</p></li>
+          <li><p><strong>Obligaciones del auditor.</strong> pathAI Partner usará la información exclusivamente para los fines de la auditoría, no la divulgará a terceros y aplicará medidas de resguardo equivalentes a las de su propia información confidencial.</p></li>
+          <li><p><strong>Hallazgos y vulnerabilidades.</strong> Se reportarán de forma exclusiva a los interlocutores autorizados de GECASER, sin divulgación pública ni a partes no autorizadas.</p></li>
+          <li><p><strong>Duración.</strong> Las obligaciones de confidencialidad permanecen vigentes durante la ejecución del proyecto y por un (1) año posterior a su finalización.</p></li>
+          <li><p><strong>Devolución o destrucción.</strong> Al cierre de la auditoría, pathAI Partner devolverá o destruirá de forma segura toda copia de la información, salvo lo requerido para el informe final.</p></li>
+          <li><p><strong>Excepciones.</strong> No se considera confidencial la información de dominio público o que deba divulgarse por mandato legal o de autoridad competente.</p></li>
+        </ol>
+
+        <div class="signblock">
+          <div class="sign-party">
+            <span class="eyebrow">Por GECASER</span>
+            <div class="sign-field"><label>Nombre</label><div class="sign-line"></div></div>
+            <div class="sign-field"><label>Cargo</label><div class="sign-line"></div></div>
+            <div class="sign-field"><label>Documento de identidad</label><div class="sign-line"></div></div>
+            <div class="sign-field"><label>Fecha</label><div class="sign-line"></div></div>
+            <div class="sign-field"><label>Firma</label><div class="sign-line"></div></div>
+          </div>
+          <div class="sign-party">
+            <span class="eyebrow">Por pathAI Partner</span>
+            <div class="sign-field"><label>Nombre</label><div class="sign-line"></div></div>
+            <div class="sign-field"><label>Cargo</label><div class="sign-line"></div></div>
+            <div class="sign-field"><label>Documento de identidad</label><div class="sign-line"></div></div>
+            <div class="sign-field"><label>Fecha</label><div class="sign-line"></div></div>
+            <div class="sign-field"><label>Firma</label><div class="sign-line"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <span class="brandmark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="1.3" style="color:var(--slate-dim)"></circle>
+        <path d="M8 15.5L15.5 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="color:var(--slate-dim)"></path>
+      </svg>
+      <span>pathaipartner.com</span>
+    </span>
+    <p>Documento de uso interno para GECASER — auditoría de cumplimiento ISO/IEC 27001:2022.</p>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('#waynav a'));
+    var sections = links.map(function (l) { return document.querySelector(l.getAttribute('href')); });
+    if (!('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var idx = sections.indexOf(entry.target);
+        if (idx === -1) return;
+        if (entry.isIntersecting) {
+          links.forEach(function (l) { l.classList.remove('active'); });
+          links[idx].classList.add('active');
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    sections.forEach(function (s) { if (s) io.observe(s); });
+  })();
+</script>
+</body></html>
